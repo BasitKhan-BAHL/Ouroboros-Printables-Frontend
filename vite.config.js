@@ -3,5 +3,6 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  base: '/ouroboros-printables-frontend/',
   plugins: [reactRouter(), tailwindcss()],
 });
