@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router";
 import { formatPrice, getCategory, getCategoryImage, getProduct } from "../catalog";
 import { useCart } from "../context/cart";
+import { useAuth } from "../context/auth";
 
 export function meta() {
   return [
@@ -41,6 +42,7 @@ export default function Product() {
   const product = getProduct(productId) || getProduct("productivity-guide");
   const category = getCategory(product.categoryId);
   const { addItem } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -80,8 +82,14 @@ export default function Product() {
           <button
             type="button"
             onClick={() => {
-              addItem(product.id);
-              navigate("/cart");
+              if (!user) {
+                navigate(`/account?action=add_to_cart&productId=${product.id}&redirect=${window.location.pathname}`);
+              } else if (!user.subscription) {
+                navigate(`/subscriptions?action=add_to_cart&productId=${product.id}&redirect=${window.location.pathname}`);
+              } else {
+                addItem(product.id);
+                navigate("/cart");
+              }
             }}
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-6 py-3 font-secondary font-medium text-white hover:bg-primary-800 sm:w-auto"
           >

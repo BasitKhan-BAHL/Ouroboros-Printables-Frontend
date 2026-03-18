@@ -10,6 +10,7 @@ import {
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { CartProvider } from "./context/cart";
+import { AuthProvider } from "./context/auth";
 import "./app.css";
 
 export const links = () => [
@@ -45,13 +46,15 @@ export function Layout({ children }) {
 
 export default function App() {
   return (
-    <CartProvider>
-      <Header />
-      <main className="min-h-[60vh]">
-        <Outlet />
-      </main>
-      <Footer />
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <Header />
+        <main className="min-h-[60vh]">
+          <Outlet />
+        </main>
+        <Footer />
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

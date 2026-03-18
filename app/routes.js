@@ -9,4 +9,7 @@ export default [
   route("checkout", "routes/checkout.jsx"),
   route("about", "routes/about.jsx"),
   route("policies", "routes/policies.jsx"),
+  route("account", "routes/account.jsx"),
+  route("subscriptions", "routes/subscriptions.jsx"),
+  route("profile", "routes/profile.jsx"),
 ];

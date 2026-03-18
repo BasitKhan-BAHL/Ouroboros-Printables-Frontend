@@ -1,6 +1,7 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { getCategoryImage } from "../catalog";
 import { useCart } from "../context/cart";
+import { useAuth } from "../context/auth";
 
 export function meta() {
   return [
@@ -20,6 +21,8 @@ function RemoveIcon() {
 
 export default function Cart() {
   const { items, subtotalFormatted, totalFormatted, totalQuantity, increment, decrement, removeItem } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   if (!items.length) {
     return (
@@ -126,12 +129,30 @@ export default function Cart() {
                 <span>{totalFormatted}</span>
               </div>
             </div>
-            <Link
-              to="/checkout"
-              className="block w-full rounded-lg bg-primary-900 py-3 text-center font-secondary font-medium text-white hover:bg-primary-800"
-            >
-              Proceed to Checkout
-            </Link>
+            {!user ? (
+              <button
+                type="button"
+                onClick={() => navigate('/account?redirect=/checkout')}
+                className="block w-full rounded-lg bg-primary-900 py-3 text-center font-secondary font-medium text-white hover:bg-primary-800"
+              >
+                Proceed to Checkout
+              </button>
+            ) : !user.subscription ? (
+              <button
+                type="button"
+                onClick={() => navigate('/subscriptions?redirect=/checkout')}
+                className="block w-full rounded-lg bg-primary-900 py-3 text-center font-secondary font-medium text-white hover:bg-primary-800"
+              >
+                Proceed to Checkout
+              </button>
+            ) : (
+              <Link
+                to="/checkout"
+                className="block w-full rounded-lg bg-primary-900 py-3 text-center font-secondary font-medium text-white hover:bg-primary-800"
+              >
+                Proceed to Checkout
+              </Link>
+            )}
             <p className="mt-3 text-center font-secondary text-xs text-primary-600">Secure checkout with instant digital delivery</p>
           </div>
         </div>
