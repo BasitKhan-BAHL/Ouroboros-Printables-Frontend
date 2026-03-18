@@ -7,6 +7,7 @@ import {
   ScrollRestoration,
 } from "react-router";
 
+import { NotificationBanner } from "./components/NotificationBanner";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { CartProvider } from "./context/cart";
@@ -48,6 +49,7 @@ export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <NotificationBanner />
         <Header />
         <main className="min-h-[60vh]">
           <Outlet />

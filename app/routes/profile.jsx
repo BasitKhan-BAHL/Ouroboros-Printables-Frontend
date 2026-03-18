@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../context/auth";
+import { useCart } from "../context/cart";
 
 export function meta() {
   return [
@@ -19,6 +20,7 @@ function UserIcon() {
 
 export default function Profile() {
   const { user, logout, removeSubscription, isInitializing } = useAuth();
+  const { clear } = useCart();
   const navigate = useNavigate();
 
   // If initializing, don't redirect yet
@@ -36,6 +38,7 @@ export default function Profile() {
 
   const handleLogout = () => {
     logout();
+    clear();
     navigate("/");
   };
 
