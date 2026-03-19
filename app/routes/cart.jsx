@@ -59,52 +59,42 @@ export default function Cart() {
         <div className="lg:col-span-2">
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
             {items.map((item) => (
-              <div key={item.productId} className="flex gap-6 border-b border-primary-100 pb-6 last:border-0 last:pb-0">
-                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-secondary-100">
-                  <img
-                    src={getCategoryImage(item.product.categoryId)}
-                    alt={item.product.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex justify-between">
-                    <h2 className="font-primary font-medium text-primary-900">{item.product.title}</h2>
-                    <button
-                      type="button"
-                      className="shrink-0 p-1"
-                      aria-label="Remove item"
-                      onClick={() => removeItem(item.productId)}
-                    >
-                      <RemoveIcon />
-                    </button>
-                  </div>
-                  <p className="font-secondary text-primary-900">{item.product.price.toFixed(2)}</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="flex h-8 w-8 items-center justify-center rounded border border-primary-200 bg-white font-secondary text-primary-900"
-                      onClick={() => decrement(item.productId)}
-                    >
-                      −
-                    </button>
-                    <input
-                      type="text"
-                      readOnly
-                      value={item.quantity}
-                      className="h-8 w-12 rounded border border-primary-200 bg-primary-50 text-center font-secondary text-primary-900"
+              <div key={item.productId} className="flex flex-col sm:flex-row gap-4 sm:gap-6 border-b border-primary-100 pb-6 last:border-0 last:pb-0">
+                <div className="flex gap-4 sm:gap-6 flex-1">
+                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-secondary-100">
+                    <img
+                      src={getCategoryImage(item.product.categoryId)}
+                      alt={item.product.title}
+                      className="h-full w-full object-cover"
                     />
-                    <button
-                      type="button"
-                      className="flex h-8 w-8 items-center justify-center rounded border border-primary-200 bg-white font-secondary text-primary-900"
-                      onClick={() => increment(item.productId)}
-                    >
-                      +
-                    </button>
+                  </div>
+                  <div className="flex flex-1 flex-col">
+                    <div className="flex justify-between items-start">
+                      <h2 className="font-primary font-medium text-primary-900 pr-2">{item.product.title}</h2>
+                      <div className="text-right font-secondary font-medium text-primary-900 sm:hidden">
+                        {item.lineTotalFormatted}
+                      </div>
+                    </div>
+                    <p className="font-secondary text-primary-600">${item.product.price.toFixed(2)}</p>
+                    <div className="mt-auto pt-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <button type="button" className="flex h-8 w-8 items-center justify-center rounded border border-primary-200 bg-white font-secondary text-primary-900" onClick={() => decrement(item.productId)}>−</button>
+                        <input type="text" readOnly value={item.quantity} className="h-8 w-12 rounded border border-primary-200 bg-primary-50 text-center font-secondary text-primary-900" />
+                        <button type="button" className="flex h-8 w-8 items-center justify-center rounded border border-primary-200 bg-white font-secondary text-primary-900" onClick={() => increment(item.productId)}>+</button>
+                      </div>
+                      <button type="button" className="shrink-0 p-2 text-primary-400 hover:text-red-500 sm:hidden" aria-label="Remove item" onClick={() => removeItem(item.productId)}>
+                        <RemoveIcon />
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right font-secondary font-medium text-primary-900">
-                  {item.lineTotalFormatted}
+                <div className="hidden sm:flex flex-col justify-between items-end">
+                  <div className="text-right font-secondary font-medium text-primary-900">
+                    {item.lineTotalFormatted}
+                  </div>
+                  <button type="button" className="shrink-0 p-2 text-primary-400 hover:text-red-500" aria-label="Remove item" onClick={() => removeItem(item.productId)}>
+                    <RemoveIcon />
+                  </button>
                 </div>
               </div>
             ))}

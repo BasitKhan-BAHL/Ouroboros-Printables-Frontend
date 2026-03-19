@@ -47,8 +47,8 @@ export default function Checkout() {
         Back to Cart
       </Link>
       <h1 className="font-primary text-2xl font-bold text-primary-900">Checkout</h1>
-      <div className="mt-8 grid gap-8 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      <div className="mt-8 flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:gap-8">
+        <div className="order-1 lg:col-span-2 lg:col-start-1 lg:row-start-1">
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
             <h2 className="font-primary text-lg font-semibold text-primary-900">Your Details</h2>
             <div className="mt-4 space-y-4">
@@ -73,6 +73,8 @@ export default function Checkout() {
               </div>
             </div>
           </div>
+        </div>
+        <div className="order-3 lg:col-span-2 lg:col-start-1 lg:row-start-2">
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
             <h2 className="font-primary text-lg font-semibold text-primary-900">Payment</h2>
             <div className="mt-4 rounded-lg border border-secondary-200 bg-secondary-50 p-4 font-secondary text-sm text-secondary-700">
@@ -90,7 +92,7 @@ export default function Checkout() {
             </button>
           </div>
         </div>
-        <div>
+        <div className="order-2 lg:col-span-1 lg:col-start-3 lg:row-span-2 lg:row-start-1">
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
             <h2 className="font-primary text-lg font-semibold text-primary-900">Order Summary</h2>
             <div className="mt-4 space-y-4 border-b border-primary-100 pb-4">
