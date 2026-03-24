@@ -47,7 +47,7 @@ export default function Cart() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8">
       <Link to="/shop" className="mb-6 inline-flex items-center gap-1 font-secondary text-primary-600 hover:text-primary-900">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -57,20 +57,20 @@ export default function Cart() {
       <h1 className="font-primary text-2xl font-bold text-primary-900">Your Cart ({totalQuantity})</h1>
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-primary-200 bg-white p-4 sm:p-6 shadow-sm">
             {items.map((item) => (
-              <div key={item.productId} className="flex flex-col sm:flex-row gap-4 sm:gap-6 border-b border-primary-100 pb-6 last:border-0 last:pb-0">
-                <div className="flex gap-4 sm:gap-6 flex-1">
-                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-secondary-100">
+              <div key={item.productId} className="flex gap-4 border-b border-primary-100 pb-6 last:border-0 last:pb-0">
+                <div className="flex gap-3 sm:gap-5 flex-1 min-w-0">
+                  <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 overflow-hidden rounded-lg bg-secondary-100">
                     <img
                       src={getCategoryImage(item.product.categoryId)}
                       alt={item.product.title}
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <div className="flex flex-1 flex-col">
-                    <div className="flex justify-between items-start">
-                      <h2 className="font-primary font-medium text-primary-900 pr-2">{item.product.title}</h2>
+                  <div className="flex flex-1 flex-col min-w-0">
+                    <div className="flex justify-between items-start gap-1">
+                      <h2 className="font-primary font-medium text-primary-900 min-w-0 flex-1 leading-snug">{item.product.title}</h2>
                       <div className="text-right font-secondary font-medium text-primary-900 sm:hidden">
                         {item.lineTotalFormatted}
                       </div>
