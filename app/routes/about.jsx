@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
+import { useAuth } from "../context/auth";
 
 export function meta() {
   return [
@@ -35,6 +37,48 @@ function SendIcon() {
 }
 
 export default function About() {
+  const { user } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState({ type: "", text: "" });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user && user.email) setEmail(user.email);
+    if (user && user.name) setName(user.name);
+  }, [user]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus({ type: "", text: "" });
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${apiUrl}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message, userId: user?.id || null }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to send message");
+
+      setStatus({ type: "success", text: "Message sent successfully!" });
+      setMessage(""); // Reset message
+      if (!user) {
+        setName("");
+        setEmail("");
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus({ type: "error", text: err.message || "Failed to send message" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8">
       <section className="mb-16">
@@ -80,12 +124,20 @@ export default function About() {
           </div>
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-md">
             <h3 className="font-primary text-lg font-semibold text-primary-900">Send a Message</h3>
-            <form className="mt-4 space-y-4">
+            {status.text && (
+              <div className={`mt-4 rounded-lg p-3 font-secondary text-sm ${status.type === "success" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
+                {status.text}
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div>
                 <label htmlFor="contact-name" className="block font-secondary text-sm font-medium text-primary-900">Name</label>
                 <input
                   id="contact-name"
                   type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
                   className="mt-1 w-full rounded-lg border border-primary-300 bg-primary-100 px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-500 focus:border-primary-400 focus:outline-none"
                 />
@@ -95,6 +147,9 @@ export default function About() {
                 <input
                   id="contact-email"
                   type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   className="mt-1 w-full rounded-lg border border-primary-300 bg-primary-100 px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-500 focus:border-primary-400 focus:outline-none"
                 />
@@ -103,6 +158,9 @@ export default function About() {
                 <label htmlFor="contact-message" className="block font-secondary text-sm font-medium text-primary-900">Message</label>
                 <textarea
                   id="contact-message"
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   rows={4}
                   placeholder="How can we help?"
                   className="mt-1 w-full rounded-lg border border-primary-300 bg-primary-100 px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-500 focus:border-primary-400 focus:outline-none"
@@ -110,10 +168,11 @@ export default function About() {
               </div>
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-4 py-3 font-secondary font-medium text-white hover:bg-primary-800 sm:w-auto"
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-4 py-3 font-secondary font-medium text-white hover:bg-primary-800 disabled:opacity-70 disabled:cursor-not-allowed sm:w-auto"
               >
-                <SendIcon />
-                Send Message
+                {loading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <SendIcon />}
+                {loading ? "Sending..." : "Send Message"}
               </button>
             </form>
           </div>

@@ -84,8 +84,8 @@ export default function Product() {
             onClick={() => {
               if (!user) {
                 navigate(`/account?action=add_to_cart&productId=${product.id}&redirect=${window.location.pathname}`);
-              } else if (!user.subscription) {
-                navigate(`/subscriptions?action=add_to_cart&productId=${product.id}&redirect=${window.location.pathname}`);
+              } else if (!user.license) {
+                navigate(`/licenses?action=add_to_cart&productId=${product.id}&redirect=${window.location.pathname}`);
               } else {
                 addItem(product.id);
                 navigate("/cart");

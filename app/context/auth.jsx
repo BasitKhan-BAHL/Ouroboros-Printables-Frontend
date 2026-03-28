@@ -2,75 +2,110 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const AuthContext = createContext(null);
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const getToken = () => (typeof window !== "undefined" ? window.localStorage.getItem("token") : null);
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
+  // On mount: restore user from stored token
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    const init = async () => {
+      const token = getToken();
+      if (!token) {
+        setIsInitializing(false);
+        return;
+      }
       try {
-        const storedUser = window.localStorage.getItem("user");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        } else {
+          // Token expired / invalid — clear it
+          window.localStorage.removeItem("token");
         }
-      } catch (err) {
-        console.error("Failed to load user from localStorage", err);
+      } catch {
+        // Network unavailable — fall back gracefully
       }
       setIsInitializing(false);
-    }
+    };
+    init();
   }, []);
 
-  const login = (email, password) => {
-    // Mock login
-    const loggedInUser = {
-      id: "usr_123",
-      email: email,
-      name: email.split("@")[0],
-      subscription: null, // e.g., { license: 'free', plan: 'monthly' }
-    };
-    setUser(loggedInUser);
+  // Store token + user helper
+  const persistSession = (token, userData) => {
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("user", JSON.stringify(loggedInUser));
+      window.localStorage.setItem("token", token);
     }
+    setUser(userData);
   };
 
-  const register = (name, email, password) => {
-    // Mock register
-    const newUser = {
-      id: "usr_" + Math.random().toString(36).substr(2, 9),
-      name,
-      email,
-      subscription: null,
-    };
-    setUser(newUser);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("user", JSON.stringify(newUser));
-    }
+  const login = async (email, password) => {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Login failed");
+    persistSession(data.token, data.user);
+    return data.user;
+  };
+
+  const register = async (name, email, password) => {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Registration failed");
+    persistSession(data.token, data.user);
+    return data.user;
   };
 
   const logout = () => {
     setUser(null);
     if (typeof window !== "undefined") {
-      window.localStorage.removeItem("user");
+      window.localStorage.removeItem("token");
     }
   };
 
-  const updateSubscription = (subscription) => {
-    if (!user) return;
-    const updatedUser = { ...user, subscription };
-    setUser(updatedUser);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("user", JSON.stringify(updatedUser));
-    }
+  const updateLicense = async (license) => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}/users/me`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ license }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to update license");
+    
+    // Refresh user to get updated license
+    setUser(data.user);
+    return data.user.license;
   };
 
-  const removeSubscription = () => {
-    if (!user) return;
-    const updatedUser = { ...user, subscription: null };
-    setUser(updatedUser);
+  // Called after Google OAuth callback — receives token from ?token= URL param
+  const loginWithToken = async (token) => {
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("user", JSON.stringify(updatedUser));
+      window.localStorage.setItem("token", token);
     }
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to fetch user");
+    setUser(data.user);
+    return data.user;
   };
 
   const value = useMemo(
@@ -81,8 +116,8 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
-      updateSubscription,
-      removeSubscription,
+      updateLicense,
+      loginWithToken,
     }),
     [user, isInitializing]
   );

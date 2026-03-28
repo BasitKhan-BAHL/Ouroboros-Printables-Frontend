@@ -127,10 +127,10 @@ export default function Cart() {
               >
                 Proceed to Checkout
               </button>
-            ) : !user.subscription ? (
+            ) : !user.license ? (
               <button
                 type="button"
-                onClick={() => navigate('/subscriptions?redirect=/checkout')}
+                onClick={() => navigate('/licenses?redirect=/checkout')}
                 className="block w-full rounded-lg bg-primary-900 py-3 text-center font-secondary font-medium text-white hover:bg-primary-800"
               >
                 Proceed to Checkout

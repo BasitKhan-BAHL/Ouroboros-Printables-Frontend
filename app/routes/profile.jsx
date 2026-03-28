@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../context/auth";
 import { useCart } from "../context/cart";
@@ -5,7 +6,7 @@ import { useCart } from "../context/cart";
 export function meta() {
   return [
     { title: "Your Profile – Ouroboros Printables" },
-    { name: "description", content: "Manage your account and subscriptions." },
+    { name: "description", content: "Manage your account and licenses." },
   ];
 }
 
@@ -22,31 +23,30 @@ export default function Profile() {
   const { user, logout, removeSubscription, isInitializing } = useAuth();
   const { clear } = useCart();
   const navigate = useNavigate();
+  // Track intentional logout so the !user guard below doesn't also fire navigate()
+  const isLoggingOut = useRef(false);
 
   // If initializing, don't redirect yet
   if (isInitializing) {
     return <div className="p-8 text-center text-primary-500">Loading...</div>;
   }
 
-  // If unauthenticated, they shouldn't be here
+  // If unauthenticated (and not in the middle of signing out), redirect to account
   if (!user) {
-    if (typeof window !== "undefined") {
+    if (!isLoggingOut.current) {
       navigate("/account?redirect=/profile");
     }
     return null;
   }
 
   const handleLogout = () => {
+    isLoggingOut.current = true;
     logout();
     clear();
     navigate("/");
   };
 
-  const handleRemoveSubscription = () => {
-    if (confirm("Are you sure you want to remove your subscription?")) {
-      removeSubscription();
-    }
-  };
+  // Removed handleRemoveSubscription since we only change licenses now.
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16 sm:px-8">
@@ -63,40 +63,19 @@ export default function Profile() {
       <div className="mt-12 grid gap-8 md:grid-cols-2">
         <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
           <h2 className="font-primary text-xl font-bold text-primary-900">Active Subscription</h2>
-          {user.subscription ? (
-            <div className="mt-4">
-              <p className="font-secondary text-sm text-primary-500">Current License</p>
-              <p className="font-primary font-medium text-primary-900 capitalize">{user.subscription.license}</p>
-              
-              <p className="mt-4 font-secondary text-sm text-primary-500">Current Plan</p>
-              <p className="font-primary font-medium text-primary-900 capitalize">{user.subscription.plan}</p>
-              
-              <div className="mt-6 flex flex-wrap gap-4">
-                <Link
-                  to="/subscriptions?redirect=/profile"
-                  className="rounded-lg bg-primary-900 px-4 py-2 font-secondary text-sm font-medium text-white transition hover:bg-primary-800"
-                >
-                  Update Plan
-                </Link>
-                <button
-                  onClick={handleRemoveSubscription}
-                  className="rounded-lg border border-red-500 bg-white px-4 py-2 font-secondary text-sm font-medium text-red-500 transition hover:bg-red-50"
-                >
-                  Remove Subscription
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4">
-              <p className="font-secondary text-primary-600">You do not have an active subscription or license.</p>
+          <div className="mt-4">
+            <p className="font-secondary text-sm text-primary-500">Current License</p>
+            <p className="font-primary font-medium text-primary-900 capitalize">{user.license}</p>
+            
+            <div className="mt-6 flex flex-wrap gap-4">
               <Link
-                to="/subscriptions?redirect=/profile"
-                className="mt-4 inline-block rounded-lg bg-primary-900 px-6 py-2 font-secondary text-sm font-medium text-white transition hover:bg-primary-800"
+                to="/licenses?redirect=/profile"
+                className="rounded-lg bg-primary-900 px-4 py-2 font-secondary text-sm font-medium text-white transition hover:bg-primary-800"
               >
-                Get a Subscription
+                Update License
               </Link>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
