@@ -4,7 +4,8 @@ const AuthContext = createContext(null);
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-const getToken = () => (typeof window !== "undefined" ? window.localStorage.getItem("token") : null);
+const getToken = () =>
+  typeof window !== "undefined" ? window.localStorage.getItem("token") : null;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -26,7 +27,6 @@ export function AuthProvider({ children }) {
           const data = await res.json();
           setUser(data.user);
         } else {
-          // Token expired / invalid — clear it
           window.localStorage.removeItem("token");
         }
       } catch {
@@ -37,7 +37,6 @@ export function AuthProvider({ children }) {
     init();
   }, []);
 
-  // Store token + user helper
   const persistSession = (token, userData) => {
     if (typeof window !== "undefined") {
       window.localStorage.setItem("token", token);
@@ -53,10 +52,15 @@ export function AuthProvider({ children }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Login failed");
+    // Handle unverified account edge case
+    if (data.requiresOtp) {
+      return { requiresOtp: true, email: data.email };
+    }
     persistSession(data.token, data.user);
     return data.user;
   };
 
+  // Step 1: Register — sends OTP email, does NOT log user in yet
   const register = async (name, email, password) => {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
@@ -65,8 +69,33 @@ export function AuthProvider({ children }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Registration failed");
+    // Returns { requiresOtp: true, email }
+    return { requiresOtp: true, email: data.email };
+  };
+
+  // Step 2: Verify OTP — logs user in and returns user
+  const verifyOtp = async (email, otp) => {
+    const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "OTP verification failed");
     persistSession(data.token, data.user);
     return data.user;
+  };
+
+  // Resend OTP
+  const resendOtp = async (email) => {
+    const res = await fetch(`${API_BASE}/auth/resend-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to resend OTP");
+    return data;
   };
 
   const logout = () => {
@@ -88,8 +117,6 @@ export function AuthProvider({ children }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Failed to update license");
-    
-    // Refresh user to get updated license
     setUser(data.user);
     return data.user.license;
   };
@@ -115,6 +142,8 @@ export function AuthProvider({ children }) {
       isInitializing,
       login,
       register,
+      verifyOtp,
+      resendOtp,
       logout,
       updateLicense,
       loginWithToken,

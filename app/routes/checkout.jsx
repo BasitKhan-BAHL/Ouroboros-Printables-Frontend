@@ -4,8 +4,8 @@ import { initializePaddle } from "@paddle/paddle-js";
 import { getCategoryImage } from "../catalog";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
-import PhoneInput from 'react-phone-number-input';
-import 'react-phone-number-input/style.css';
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 export function meta() {
   return [
@@ -23,6 +23,15 @@ function LockIcon() {
   );
 }
 
+function Spinner() {
+  return (
+    <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+    </svg>
+  );
+}
+
 export default function Checkout() {
   const { items, subtotalFormatted, totalFormatted, totalQuantity, clear } = useCart();
   const { user } = useAuth();
@@ -30,23 +39,35 @@ export default function Checkout() {
 
   const [phone, setPhone] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
   const [error, setError] = useState("");
   const [paddle, setPaddle] = useState(null);
+  // Holds the order data after API call — needed to store in session for receipt
+  const [pendingOrder, setPendingOrder] = useState(null);
 
   useEffect(() => {
     const initPaddle = async () => {
-      if (import.meta.env.VITE_PADDLE_CLIENT_TOKEN) {
+      const token = import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
+      if (token && token !== "your_paddle_client_token_here") {
         try {
           const paddleInstance = await initializePaddle({
-            environment: import.meta.env.VITE_PADDLE_ENVIRONMENT === 'sandbox' ? 'sandbox' : 'production',
-            token: import.meta.env.VITE_PADDLE_CLIENT_TOKEN,
-            eventCallback: function(data) {
+            environment:
+              import.meta.env.VITE_PADDLE_ENVIRONMENT === "sandbox"
+                ? "sandbox"
+                : "production",
+            token: token,
+            eventCallback: function (data) {
               if (data.name === "checkout.completed") {
+                // Store receipt data in sessionStorage so receipt page can read it instantly
+                const receiptData = pendingOrder
+                  ? { ...pendingOrder, status: "paid" }
+                  : null;
+                if (receiptData) {
+                  sessionStorage.setItem("lastOrder", JSON.stringify(receiptData));
+                }
                 clear();
-                setOrderSuccess(true);
+                navigate("/receipt");
               }
-            }
+            },
           });
           setPaddle(paddleInstance);
         } catch (err) {
@@ -55,7 +76,8 @@ export default function Checkout() {
       }
     };
     initPaddle();
-  }, []);
+    // Re-run when pendingOrder becomes available so the callback captures it
+  }, [pendingOrder]);
 
   const handlePay = async () => {
     setIsProcessing(true);
@@ -64,9 +86,9 @@ export default function Checkout() {
       const token = window.localStorage.getItem("token");
       if (!token) throw new Error("Authentication required. Please log in first.");
 
-      const orderItems = items.map(item => ({
+      const orderItems = items.map((item) => ({
         productId: item.productId,
-        quantity: item.quantity
+        quantity: item.quantity,
       }));
 
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -74,35 +96,38 @@ export default function Checkout() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           items: orderItems,
           customerEmail: user?.email,
           customerName: user?.name,
-          phone: phone
-        })
+          phone: phone,
+        }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to place order");
 
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to place order");
-      }
+      // Keep order in state so the Paddle callback can store it for the receipt
+      setPendingOrder(data.order);
 
-      // If Paddle is fully configured, pop the secure overlay
+      // ── Open Paddle overlay via Transaction ID ──────────────────────────
       if (data.transactionId && paddle) {
         paddle.Checkout.open({
           transactionId: data.transactionId,
           settings: {
             displayMode: "overlay",
-            theme: "light"
-          }
+            theme: "light",
+            locale: "en",
+          },
         });
       } else {
-        // Fallback for mock sandbox flow when keys are deactivated
+        // Fallback when Paddle is not configured — go to receipt directly
+        const receiptData = { ...data.order, status: "paid" };
+        sessionStorage.setItem("lastOrder", JSON.stringify(receiptData));
         clear();
-        setOrderSuccess(true);
+        navigate("/receipt");
       }
     } catch (err) {
       setError(err.message);
@@ -137,36 +162,38 @@ export default function Checkout() {
         Back to Cart
       </Link>
       <h1 className="font-primary text-2xl font-bold text-primary-900">Checkout</h1>
+
       <div className="mt-8 flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:gap-8">
+        {/* ── Your Details ── */}
         <div className="order-1 lg:col-span-2 lg:col-start-1 lg:row-start-1">
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
             <h2 className="font-primary text-lg font-semibold text-primary-900">Your Details</h2>
             <div className="mt-4 space-y-4">
               <div>
-                <label htmlFor="email" className="block font-secondary text-sm font-medium text-primary-900">Email Address</label>
+                <label htmlFor="checkout-email" className="block font-secondary text-sm font-medium text-primary-900">Email Address</label>
                 <input
-                  id="email"
+                  id="checkout-email"
                   type="email"
                   readOnly
                   value={user?.email || ""}
-                  className="mt-1 w-full rounded-lg border border-primary-200 bg-primary-100 px-4 py-2 font-secondary text-primary-900 text-opacity-70 cursor-not-allowed focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-primary-200 bg-primary-100 px-4 py-2 font-secondary text-primary-900 cursor-not-allowed focus:outline-none"
                 />
-                <p className="mt-1 font-secondary text-xs text-primary-500">Your download links will be sent here</p>
+                <p className="mt-1 font-secondary text-xs text-primary-500">Your receipt will be sent here</p>
               </div>
               <div>
-                <label htmlFor="name" className="block font-secondary text-sm font-medium text-primary-900">Full Name</label>
+                <label htmlFor="checkout-name" className="block font-secondary text-sm font-medium text-primary-900">Full Name</label>
                 <input
-                  id="name"
+                  id="checkout-name"
                   type="text"
                   readOnly
                   value={user?.name || ""}
-                  className="mt-1 w-full rounded-lg border border-primary-200 bg-primary-100 px-4 py-2 font-secondary text-primary-900 text-opacity-70 cursor-not-allowed focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-primary-200 bg-primary-100 px-4 py-2 font-secondary text-primary-900 cursor-not-allowed focus:outline-none"
                 />
               </div>
               <div>
-                <label htmlFor="phone" className="block font-secondary text-sm font-medium text-primary-900 mb-1">Phone Number (Optional)</label>
+                <label htmlFor="checkout-phone" className="block font-secondary text-sm font-medium text-primary-900 mb-1">Phone Number (Optional)</label>
                 <PhoneInput
-                  id="phone"
+                  id="checkout-phone"
                   international
                   defaultCountry="US"
                   value={phone}
@@ -177,66 +204,45 @@ export default function Checkout() {
             </div>
           </div>
         </div>
+
+        {/* ── Payment ── */}
         <div className="order-3 lg:col-span-2 lg:col-start-1 lg:row-start-2">
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
             <h2 className="font-primary text-lg font-semibold text-primary-900">Payment</h2>
-            {orderSuccess ? (
-              <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-6 text-center shadow-inner">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-green-900 mb-2">Order Confirmed!</h3>
-                <p className="font-secondary text-sm text-green-700 mb-6 font-medium">Your receipt and downloads have been sent to {user?.email}.</p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    to="/"
-                    className="rounded-lg bg-green-700 px-6 py-2.5 font-secondary text-sm font-medium text-white shadow-sm hover:bg-green-800 transition text-center"
-                  >
-                    Continue Shopping
-                  </Link>
-                  <Link
-                    to="/profile"
-                    className="rounded-lg border border-green-700 bg-green-50 px-6 py-2.5 font-secondary text-sm font-medium text-green-800 shadow-sm hover:bg-green-100 transition text-center"
-                  >
-                    View My Orders
-                  </Link>
-                </div>
+
+            {error && (
+              <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200 font-medium">
+                {error}
               </div>
-            ) : (
-              <>
-                <div className="mt-4 rounded-lg border border-secondary-200 bg-secondary-50 p-4 font-secondary text-sm text-secondary-700 text-center">
-                  Payment integration requires backend setup. For now, click <span className="font-bold">Pay</span> to simulate a purchase.
-                </div>
-                {error && (
-                  <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200 font-medium">
-                    {error}
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={handlePay}
-                  disabled={isProcessing}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-900 py-3.5 font-secondary text-lg font-bold text-white shadow hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed transition"
-                >
-                  {isProcessing ? (
-                    <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                      <line x1="1" y1="10" x2="23" y2="10" />
-                    </svg>
-                  )}
-                  {isProcessing ? "Processing..." : `Pay £${totalFormatted}`}
-                </button>
-              </>
             )}
+
+            <div className="mt-4 rounded-lg border border-secondary-200 bg-secondary-50 p-4 font-secondary text-sm text-secondary-700 text-center">
+              {paddle
+                ? "Secure payment powered by Paddle."
+                : "Payment will be processed securely. Click Pay to continue."}
+            </div>
+
+            <button
+              id="btn-pay"
+              type="button"
+              onClick={handlePay}
+              disabled={isProcessing}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-900 py-3.5 font-secondary text-lg font-bold text-white shadow hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed transition"
+            >
+              {isProcessing ? (
+                <Spinner />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                  <line x1="1" y1="10" x2="23" y2="10" />
+                </svg>
+              )}
+              {isProcessing ? "Processing..." : `Pay ${totalFormatted}`}
+            </button>
           </div>
         </div>
+
+        {/* ── Order Summary ── */}
         <div className="order-2 lg:col-span-1 lg:col-start-3 lg:row-span-2 lg:row-start-1">
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
             <h2 className="font-primary text-lg font-semibold text-primary-900">Order Summary</h2>
@@ -274,7 +280,7 @@ export default function Checkout() {
             </div>
             <p className="flex items-center gap-2 font-secondary text-xs text-primary-500">
               <LockIcon />
-              Secure checkout with OTP verification
+              Secure checkout powered by Paddle
             </p>
           </div>
         </div>

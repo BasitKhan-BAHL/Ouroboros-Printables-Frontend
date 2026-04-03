@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../context/auth";
 
@@ -9,11 +9,21 @@ export function meta() {
   ];
 }
 
+// ─── Icons ────────────────────────────────────────────────────────────────────
 function UserIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
     </svg>
   );
 }
@@ -29,8 +39,195 @@ function GoogleIcon() {
   );
 }
 
+function Spinner() {
+  return (
+    <svg className="animate-spin h-4 w-4 text-current inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+    </svg>
+  );
+}
+
+// ─── OTP Screen ───────────────────────────────────────────────────────────────
+const OTP_LENGTH = 6;
+const RESEND_COOLDOWN = 60; // seconds
+
+function OtpScreen({ email, onSuccess, onBack }) {
+  const { verifyOtp, resendOtp } = useAuth();
+  const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(""));
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
+  const [countdown, setCountdown] = useState(RESEND_COOLDOWN);
+  const inputRefs = useRef([]);
+
+  // Countdown timer for resend button
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdown]);
+
+  const handleDigitChange = (idx, val) => {
+    const cleaned = val.replace(/\D/g, "").slice(-1);
+    const updated = [...digits];
+    updated[idx] = cleaned;
+    setDigits(updated);
+    setError("");
+    if (cleaned && idx < OTP_LENGTH - 1) {
+      inputRefs.current[idx + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (idx, e) => {
+    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+      inputRefs.current[idx - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
+    if (!pasted) return;
+    const updated = Array(OTP_LENGTH).fill("");
+    pasted.split("").forEach((ch, i) => { updated[i] = ch; });
+    setDigits(updated);
+    inputRefs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
+  };
+
+  const handleVerify = async () => {
+    const otp = digits.join("");
+    if (otp.length < OTP_LENGTH) {
+      setError("Please enter all 6 digits.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const user = await verifyOtp(email, otp);
+      onSuccess(user);
+    } catch (err) {
+      setError(err.message);
+      setDigits(Array(OTP_LENGTH).fill(""));
+      inputRefs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    setResendMsg("");
+    setError("");
+    try {
+      await resendOtp(email);
+      setResendMsg("A new code has been sent!");
+      setCountdown(RESEND_COOLDOWN);
+      setDigits(Array(OTP_LENGTH).fill(""));
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-16 sm:px-8">
+      {/* Icon */}
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-900">
+        <MailIcon />
+      </div>
+      <h1 className="mt-6 font-primary text-3xl font-bold text-primary-900">Check your email</h1>
+      <p className="mt-2 text-center font-secondary text-primary-600">
+        We sent a 6-digit code to <strong className="text-primary-900">{email}</strong>.
+        <br />Enter it below to verify your account.
+      </p>
+
+      <div className="mt-8 w-full rounded-xl border border-primary-200 bg-white p-8 shadow-sm">
+        {/* Digit inputs */}
+        <div className="flex justify-center gap-3" onPaste={handlePaste}>
+          {digits.map((d, i) => (
+            <input
+              key={i}
+              id={`otp-digit-${i}`}
+              ref={(el) => (inputRefs.current[i] = el)}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={d}
+              autoFocus={i === 0}
+              onChange={(e) => handleDigitChange(i, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              className={`h-14 w-12 rounded-xl border-2 text-center font-primary text-2xl font-bold text-primary-900 outline-none transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-200 ${
+                error ? "border-red-400 bg-red-50" : d ? "border-primary-400 bg-primary-50" : "border-primary-200 bg-white"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 font-secondary text-sm text-red-600 text-center">
+            {error}
+          </div>
+        )}
+
+        {/* Resend success */}
+        {resendMsg && !error && (
+          <div className="mt-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 font-secondary text-sm text-green-700 text-center">
+            {resendMsg}
+          </div>
+        )}
+
+        {/* Verify button */}
+        <button
+          type="button"
+          onClick={handleVerify}
+          disabled={loading || digits.join("").length < OTP_LENGTH}
+          className="mt-6 w-full flex justify-center items-center gap-2 rounded-lg bg-primary-900 py-3 font-secondary font-medium text-white hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed transition"
+        >
+          {loading && <Spinner />}
+          {loading ? "Verifying…" : "Verify & Create Account"}
+        </button>
+
+        {/* Resend + Back */}
+        <div className="mt-5 flex flex-col items-center gap-2 text-center">
+          {countdown > 0 ? (
+            <p className="font-secondary text-sm text-primary-500">
+              Resend code in <span className="font-semibold text-primary-700">{countdown}s</span>
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resendLoading}
+              className="font-secondary text-sm font-medium text-primary-700 hover:text-primary-900 underline underline-offset-2 disabled:opacity-60"
+            >
+              {resendLoading ? "Sending…" : "Resend code"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onBack}
+            className="font-secondary text-sm text-primary-500 hover:text-primary-800 transition"
+          >
+            ← Back to sign up
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Account Component ───────────────────────────────────────────────────
+// screen: "auth" | "otp"
 export default function Account() {
   const [activeTab, setActiveTab] = useState("signin");
+  const [screen, setScreen] = useState("auth"); // "auth" | "otp"
+  const [pendingEmail, setPendingEmail] = useState("");
+
   const { login, register, loginWithToken } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -48,61 +245,35 @@ export default function Account() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [verifyingToken, setVerifyingToken] = useState(!!tokenParam);
 
-  const Spinner = () => (
-    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-  );
-
   // Handle Google OAuth callback token arriving in URL
   useEffect(() => {
-    if (!tokenParam) {
-      setVerifyingToken(false);
-      return;
-    }
+    if (!tokenParam) { setVerifyingToken(false); return; }
     loginWithToken(tokenParam).then((user) => {
-      // Clean token from URL so it doesn't re-run on refresh
       const url = new URL(window.location.href);
       url.searchParams.delete("token");
       window.history.replaceState({}, "", url.toString());
-
-      // If user somehow doesn't have a license, send them to pick one
-      if (!user?.license) {
-        const nextUrl = new URLSearchParams();
-        if (redirectParam) nextUrl.set("redirect", redirectParam);
-        if (actionParam) nextUrl.set("action", actionParam);
-        if (productIdParam) nextUrl.set("productId", productIdParam);
-        navigate(`/licenses?${nextUrl.toString()}`);
-      } else {
-        navigate(redirectParam || "/");
-      }
+      navigate(redirectParam || "/");
     }).catch(() => {
       setError("Google sign-in failed. Please try again.");
       setVerifyingToken(false);
     });
   }, [tokenParam]);
 
-  const handleAuthSuccess = (isNewUser) => {
-    if (isNewUser) {
-      const nextUrl = new URLSearchParams();
-      if (redirectParam) nextUrl.set("redirect", redirectParam);
-      if (actionParam) nextUrl.set("action", actionParam);
-      if (productIdParam) nextUrl.set("productId", productIdParam);
-      // New users get free license default, navigate to redirect path directly
-      navigate(redirectParam || "/");
-    } else {
-      navigate(redirectParam || "/");
-    }
-  };
+  const handleAuthSuccess = () => navigate(redirectParam || "/");
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      await login(email, password);
-      handleAuthSuccess(false);
+      const result = await login(email, password);
+      // If account not yet verified, redirect to OTP screen
+      if (result?.requiresOtp) {
+        setPendingEmail(result.email);
+        setScreen("otp");
+        return;
+      }
+      handleAuthSuccess();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -115,8 +286,11 @@ export default function Account() {
     setError("");
     setLoading(true);
     try {
-      await register(name, email, password);
-      handleAuthSuccess(true);
+      const result = await register(name, email, password);
+      if (result.requiresOtp) {
+        setPendingEmail(result.email);
+        setScreen("otp");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -130,10 +304,11 @@ export default function Account() {
     window.location.href = `${apiUrl}/auth/google`;
   };
 
+  // ── Verifying Google token spinner ───────────────────────────────────────
   if (verifyingToken) {
     return (
       <div className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-24 sm:px-8">
-        <div className="text-primary-900 mb-4 scale-150">
+        <div className="text-primary-900 mb-4">
           <Spinner />
         </div>
         <p className="font-secondary text-primary-600 animate-pulse">Completing sign in...</p>
@@ -141,6 +316,22 @@ export default function Account() {
     );
   }
 
+  // ── OTP Screen ────────────────────────────────────────────────────────────
+  if (screen === "otp") {
+    return (
+      <OtpScreen
+        email={pendingEmail}
+        onSuccess={handleAuthSuccess}
+        onBack={() => {
+          setScreen("auth");
+          setActiveTab("create");
+          setError("");
+        }}
+      />
+    );
+  }
+
+  // ── Auth forms ────────────────────────────────────────────────────────────
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-16 sm:px-8">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-900">
@@ -154,6 +345,7 @@ export default function Account() {
       {/* Google Sign In */}
       <div className="mt-8 w-full">
         <button
+          id="btn-google-signin"
           type="button"
           disabled={googleLoading}
           onClick={handleGoogleSignIn}
@@ -172,8 +364,10 @@ export default function Account() {
       </div>
 
       <div className="mt-6 w-full overflow-hidden rounded-xl border border-primary-200 bg-white shadow-sm">
+        {/* Tabs */}
         <div className="flex border-b border-primary-200 bg-primary-50">
           <button
+            id="tab-signin"
             className={`flex-1 py-3 text-center font-secondary text-sm font-medium transition ${
               activeTab === "signin"
                 ? "bg-white text-primary-900 shadow-[inset_0_2px_0_0_#18181b]"
@@ -184,6 +378,7 @@ export default function Account() {
             Sign In
           </button>
           <button
+            id="tab-create"
             className={`flex-1 py-3 text-center font-secondary text-sm font-medium transition ${
               activeTab === "create"
                 ? "bg-white text-primary-900 shadow-[inset_0_2px_0_0_#18181b]"
@@ -203,10 +398,11 @@ export default function Account() {
           )}
 
           {activeTab === "signin" ? (
-            <form onSubmit={handleSignIn} className="space-y-4">
+            <form id="form-signin" onSubmit={handleSignIn} className="space-y-4">
               <div>
                 <label className="block font-secondary text-sm font-medium text-primary-900">Email</label>
                 <input
+                  id="input-signin-email"
                   type="email"
                   required
                   value={email}
@@ -218,6 +414,7 @@ export default function Account() {
               <div>
                 <label className="block font-secondary text-sm font-medium text-primary-900">Password</label>
                 <input
+                  id="input-signin-password"
                   type="password"
                   required
                   value={password}
@@ -227,19 +424,21 @@ export default function Account() {
                 />
               </div>
               <button
+                id="btn-signin-submit"
                 type="submit"
                 disabled={loading}
-                className="mt-6 w-full flex justify-center items-center gap-2 rounded-lg bg-primary-900 py-3 font-secondary font-medium text-white hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="mt-6 w-full flex justify-center items-center gap-2 rounded-lg bg-primary-900 py-3 font-secondary font-medium text-white hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed transition"
               >
                 {loading && <Spinner />}
                 {loading ? "Signing in…" : "Sign In"}
               </button>
             </form>
           ) : (
-            <form onSubmit={handleCreateAccount} className="space-y-4">
+            <form id="form-create" onSubmit={handleCreateAccount} className="space-y-4">
               <div>
                 <label className="block font-secondary text-sm font-medium text-primary-900">Name</label>
                 <input
+                  id="input-create-name"
                   type="text"
                   required
                   value={name}
@@ -251,6 +450,7 @@ export default function Account() {
               <div>
                 <label className="block font-secondary text-sm font-medium text-primary-900">Email</label>
                 <input
+                  id="input-create-email"
                   type="email"
                   required
                   value={email}
@@ -262,6 +462,7 @@ export default function Account() {
               <div>
                 <label className="block font-secondary text-sm font-medium text-primary-900">Password</label>
                 <input
+                  id="input-create-password"
                   type="password"
                   required
                   minLength={6}
@@ -271,13 +472,17 @@ export default function Account() {
                   className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
                 />
               </div>
+              <p className="font-secondary text-xs text-primary-500">
+                A 6-digit verification code will be sent to your email.
+              </p>
               <button
+                id="btn-create-submit"
                 type="submit"
                 disabled={loading}
-                className="mt-6 w-full flex items-center justify-center gap-2 rounded-lg bg-primary-900 py-3 font-secondary font-medium text-white hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="mt-2 w-full flex items-center justify-center gap-2 rounded-lg bg-primary-900 py-3 font-secondary font-medium text-white hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed transition"
               >
                 {loading && <Spinner />}
-                {loading ? "Creating account…" : "Create Account"}
+                {loading ? "Sending code…" : "Send Verification Code"}
               </button>
             </form>
           )}
