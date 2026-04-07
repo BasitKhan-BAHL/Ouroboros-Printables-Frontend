@@ -116,7 +116,15 @@ export default function Receipt() {
     <>
       {/* ── Print styles ── */}
       <style>{`
+        @page {
+          margin: 0mm; /* Removes default browser headers & footers (URLs/Dates) */
+        }
         @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
           /* Hide everything in the body by default */
           body * {
             visibility: hidden;
@@ -135,8 +143,9 @@ export default function Receipt() {
             width: 100% !important;
             margin: 0 !important;
             box-shadow: none !important;
-            border: 1px solid #ddd !important;
+            border: none !important;
             border-radius: 0 !important;
+            page-break-inside: avoid;
           }
 
           /* Explicitly hide the 'no-print' elements inside the card if any */
