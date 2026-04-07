@@ -20,13 +20,16 @@ function formatDate(dateStr) {
 function StatusBadge({ status }) {
   const map = {
     paid: "bg-green-100 text-green-800 border-green-200",
-    pending: "bg-amber-100 text-amber-800 border-amber-200",
+    pending: "bg-blue-100 text-blue-800 border-blue-200", // Using a positive blue color for processing
     failed: "bg-red-100 text-red-800 border-red-200",
     refunded: "bg-gray-100 text-gray-600 border-gray-200",
   };
+  
+  const displayStatus = status === "pending" ? "processing" : status;
+  
   return (
     <span className={`inline-flex items-center rounded-full border px-3 py-1 font-secondary text-xs font-semibold capitalize ${map[status] || map.pending}`}>
-      {status}
+      {displayStatus}
     </span>
   );
 }
@@ -114,13 +117,32 @@ export default function Receipt() {
       {/* ── Print styles ── */}
       <style>{`
         @media print {
-          .no-print { display: none !important; }
-          body { background: white !important; }
+          /* Hide everything in the body by default */
+          body * {
+            visibility: hidden;
+          }
+          
+          /* Make the receipt card and its children visible */
+          .receipt-card, .receipt-card * {
+            visibility: visible;
+          }
+
+          /* Position the receipt at the top left of the page */
           .receipt-card {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
             box-shadow: none !important;
             border: 1px solid #ddd !important;
-            margin: 0 !important;
-            max-width: 100% !important;
+            border-radius: 0 !important;
+          }
+
+          /* Explicitly hide the 'no-print' elements inside the card if any */
+          .no-print, .no-print * {
+            display: none !important;
+            visibility: hidden !important;
           }
         }
       `}</style>
