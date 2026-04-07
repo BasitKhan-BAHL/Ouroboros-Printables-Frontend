@@ -120,6 +120,8 @@ export default function Checkout() {
             displayMode: "overlay",
             theme: "light",
             locale: "en",
+            showAddDiscounts: false,
+            showAddTaxId: false,
           },
         });
       } else {
