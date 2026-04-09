@@ -47,7 +47,7 @@ export default function Cart() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8">
+    <div className="mx-auto max-w-[90rem] px-6 py-12 sm:px-8">
       <Link to="/shop" className="mb-6 inline-flex items-center gap-1 font-secondary text-primary-600 hover:text-primary-900">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M19 12H5M12 19l-7-7 7-7" />

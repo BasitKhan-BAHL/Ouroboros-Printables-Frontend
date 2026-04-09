@@ -7,7 +7,7 @@ export function NotificationBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="relative isolate flex flex-col items-center justify-center gap-3 overflow-hidden bg-primary-900 px-6 py-3 sm:flex-row sm:justify-center sm:gap-x-6 sm:px-3.5">
+    <div className="relative isolate hidden lg:flex items-center justify-center gap-3 overflow-hidden bg-primary-900 px-6 py-3 lg:flex-row lg:gap-x-6 lg:px-3.5">
       {/* Decorative ambient blurred gradients */}
       <div
         className="absolute left-[max(-7rem,calc(50%-52rem))] top-1/2 -z-10 -translate-y-1/2 transform-gpu blur-2xl"

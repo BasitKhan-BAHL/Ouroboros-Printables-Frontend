@@ -80,7 +80,7 @@ export default function About() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8">
+    <div className="mx-auto max-w-[90rem] px-6 py-12 sm:px-8">
       <section className="mb-16">
         <h1 className="font-primary text-3xl font-bold text-primary-900">About Us</h1>
         <div className="mt-6 max-w-3xl space-y-4 font-secondary text-primary-900">
@@ -109,7 +109,7 @@ export default function About() {
               </div>
               <div>
                 <p className="font-secondary font-semibold text-primary-900">Email</p>
-                <a href="mailto:support@digitalgoods.com" className="font-secondary text-primary-900 underline hover:text-primary-700">support@digitalgoods.com</a>
+                <a href="mailto:support@ouroborosprintables.com" className="font-secondary text-primary-900 underline hover:text-primary-700">support@ouroborosprintables.com</a>
               </div>
             </div>
             <div className="flex gap-4">

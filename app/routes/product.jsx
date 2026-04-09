@@ -46,7 +46,7 @@ export default function Product() {
   const navigate = useNavigate();
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
+    <div className="mx-auto max-w-[90rem] px-6 py-12 sm:px-8">
       <nav className="mb-8 font-secondary text-sm text-primary-500">
         <Link to="/" className="hover:text-primary-700">Home</Link>
         <span className="mx-2">&gt;</span>

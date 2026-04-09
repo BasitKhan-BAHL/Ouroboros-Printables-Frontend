@@ -18,7 +18,7 @@ function ArrowRight() {
 
 export default function Shop() {
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8">
+    <div className="mx-auto max-w-[90rem] px-6 py-12 sm:px-8">
       <div className="mb-10">
         <h1 className="font-primary text-3xl font-bold text-primary-900">All Categories</h1>
         <p className="mt-2 font-secondary text-primary-600">Browse our collection of premium digital products</p>

@@ -24,7 +24,7 @@ const policies = [
           We use cookies and similar technologies to remember your preferences and understand how you use our site. You can control cookie settings through your browser.
         </p>
         <p className="font-secondary text-primary-800">
-          You have the right to access, correct, or delete your personal information at any time. Contact us at support@digitalgoods.com for any requests or questions about your data.
+          You have the right to access, correct, or delete your personal information at any time. Contact us at support@ouroborosprintables.com for any requests or questions about your data.
         </p>
       </>
     ),
@@ -114,7 +114,7 @@ export default function Policies() {
       <p className="mt-8 text-center font-secondary text-sm text-primary-500">Last updated: December 2024</p>
       <p className="mt-2 text-center font-secondary text-sm text-primary-600">
         Questions? Contact us at{" "}
-        <a href="mailto:support@digitalgoods.com" className="underline hover:text-primary-900">support@digitalgoods.com</a>
+        <a href="mailto:support@ouroborosprintables.com" className="underline hover:text-primary-900">support@ouroborosprintables.com</a>
       </p>
     </div>
   );

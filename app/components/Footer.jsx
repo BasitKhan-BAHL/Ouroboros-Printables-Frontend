@@ -3,7 +3,7 @@ import { Link } from "react-router";
 export function Footer() {
   return (
     <footer className="border-t border-primary-200 bg-primary-50">
-      <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8">
+      <div className="mx-auto max-w-[90rem] px-6 py-12 sm:px-8">
         <div className="grid gap-8 sm:grid-cols-3">
           <div>
             <h3 className="font-primary text-lg font-semibold text-primary-900">Ouroboros Printables</h3>
@@ -25,7 +25,7 @@ export function Footer() {
               <li><Link to="/about" className="hover:text-primary-900">Contact Us</Link></li>
               <li><Link to="/policies" className="hover:text-primary-900">Policies</Link></li>
               <li>
-                <a href="mailto:support@digitalgoods.com" className="underline hover:text-primary-900">support@digitalgoods.com</a>
+                <a href="mailto:support@ouroborosprintables.com" className="underline hover:text-primary-900">support@ouroborosprintables.com</a>
               </li>
             </ul>
           </div>

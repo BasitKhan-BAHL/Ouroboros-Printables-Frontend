@@ -52,7 +52,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-primary-200 bg-primary-50 shadow-sm">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-8">
+      <nav className="mx-auto flex max-w-[90rem] items-center justify-between px-6 py-4 sm:px-8">
         <NavLink to="/" className="flex items-center gap-2 font-primary text-primary-900" onClick={closeMobileMenu}>
           <img src={logo} alt="Ouroboros Printables" className="h-10 w-10 rounded-full object-cover" />
           <span className="font-semibold">Ouroboros Printables</span>
