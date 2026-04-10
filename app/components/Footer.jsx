@@ -6,17 +6,19 @@ export function Footer() {
       <div className="mx-auto max-w-[90rem] px-6 py-12 sm:px-8">
         <div className="grid gap-8 sm:grid-cols-3">
           <div>
-            <h3 className="font-primary text-lg font-semibold text-primary-900">Ouroboros Printables</h3>
-            <p className="mt-2 font-secondary text-sm text-primary-600">
-              Premium digital products delivered instantly. Quality templates, e-books, courses, and graphics to help you succeed.
+            <h3 className="font-primary text-lg font-semibold text-primary-900 uppercase tracking-wider">Disclaimer</h3>
+            <p className="mt-2 font-secondary text-sm text-primary-600 leading-relaxed">
+              All products are instantly downloadable upon purchase. See <Link to="/policies" className="underline hover:text-primary-900">purchase policies</Link> for details.
             </p>
           </div>
           <div>
-            <h3 className="font-primary text-lg font-semibold text-primary-900">Shop</h3>
+            <h3 className="font-primary text-lg font-semibold text-primary-900 tracking-wider">Shop</h3>
             <ul className="mt-2 space-y-1 font-secondary text-sm text-primary-700">
               <li><Link to="/shop" className="hover:text-primary-900">All Categories</Link></li>
-              <li><Link to="/shop/category/templates" className="hover:text-primary-900">Templates</Link></li>
-              <li><Link to="/shop/category/e-books" className="hover:text-primary-900">E-Books</Link></li>
+              <li><Link to="/shop/category/literature" className="hover:text-primary-900">Literature</Link></li>
+              <li><Link to="/shop/category/education" className="hover:text-primary-900">Education</Link></li>
+              <li><Link to="/shop/category/organisation" className="hover:text-primary-900">Organisation</Link></li>
+              <li><Link to="/shop/category/stationary" className="hover:text-primary-900">Stationary</Link></li>
             </ul>
           </div>
           <div>

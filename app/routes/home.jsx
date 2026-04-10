@@ -102,6 +102,130 @@ function ValuePropositionVisual() {
   );
 }
 
+function TradeVisual() {
+  return (
+    <div className="mx-auto mt-12 lg:mt-0 w-full max-w-4xl">
+      {/* Top Title Box */}
+      <div className="mb-6 flex justify-center">
+        <div className="rounded-xl border-2 border-[#071326] bg-white px-8 py-3 shadow-sm">
+          <h2 className="font-primary text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#071326]">
+            WHAT YOU GET <span className="font-normal text-slate-400 italic">vs.</span> WHAT WE GET
+          </h2>
+        </div>
+      </div>
+
+      <div className="relative flex flex-col lg:flex-row items-stretch justify-center gap-4 lg:gap-0">
+        {/* Left Container: WHAT YOU GET */}
+        <div className="flex-1 rounded-3xl border-2 border-[#071326] bg-white p-6 sm:p-8 shadow-xl">
+          <div className="mb-8 flex justify-center">
+            <span className="rounded-lg bg-[#071326] px-4 py-1.5 font-primary text-sm font-bold tracking-widest text-white">
+              WHAT YOU GET
+            </span>
+          </div>
+
+          <div className="flex items-center justify-around gap-2 px-2">
+            {/* PDF Icon */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative flex h-16 w-12 flex-col items-center rounded-lg border-2 border-[#071326] bg-white shadow-sm ring-offset-2">
+                <div className="absolute right-0 top-0 h-4 w-4 border-b-2 border-l-2 border-[#071326] bg-slate-50" />
+                <div className="mt-6 h-1 w-8 bg-[#071326]/10" />
+                <div className="mt-1 h-1 w-8 bg-[#071326]/10" />
+                <div className="mt-4 flex w-full justify-center bg-[#071326] py-1 text-[8px] font-black text-white">PDF</div>
+              </div>
+            </div>
+
+            {/* Dash Arrow */}
+            <svg width="40" height="24" viewBox="0 0 40 24" fill="none" className="text-[#071326]">
+              <path d="M5 12h25M30 12l-7-7m7 7l-7 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="6 4" />
+            </svg>
+
+            {/* Printer Icon */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative flex h-20 w-24 flex-col items-center justify-center rounded-xl border-2 border-[#071326] bg-slate-50 shadow-md">
+                {/* Printer Body */}
+                <div className="absolute -top-3 h-6 w-16 rounded-t-lg border-2 border-[#071326] bg-white" />
+                <div className="z-10 flex h-full w-full flex-col items-center justify-center gap-1">
+                   <svg className="h-4 w-4 text-[#071326]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4">
+                    <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z" />
+                   </svg>
+                   {/* Exit Sheet with Arrow */}
+                   <div className="flex h-8 w-12 flex-col items-center justify-center rounded-sm border-2 border-[#071326] bg-white">
+                      <svg className="h-4 w-4 text-[#071326]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                        <path d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dash Arrow */}
+            <svg width="40" height="24" viewBox="0 0 40 24" fill="none" className="text-[#071326]">
+              <path d="M5 12h25M30 12l-7-7m7 7l-7 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="6 4" />
+            </svg>
+
+            {/* Cash Icon */}
+            <div className="flex flex-col items-center">
+              <div className="relative flex h-14 w-20 flex-col items-center justify-center rounded-lg border-2 border-[#071326] bg-green-50 shadow-sm transition-transform hover:scale-110">
+                <div className="absolute -top-1 left-1 h-full w-full rounded-lg border-2 border-[#071326] bg-white" />
+                <div className="z-10 flex h-6 w-10 items-center justify-center rounded-full border-2 border-green-600 bg-green-100 font-black text-green-700">
+                  <span className="text-xs">€</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-8 text-center font-primary text-xl font-bold leading-tight text-[#071326]">
+            Get a PDF, create unlimited,<br /> high-profit hardcopies forever.
+          </p>
+        </div>
+
+        {/* Trade Divider */}
+        <div className="z-20 flex flex-col items-center justify-center lg:-mx-4">
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-[#071326] bg-white p-3 shadow-lg lg:rotate-0">
+            <span className="text-[10px] font-black uppercase text-[#071326]">THE</span>
+            <svg className="h-8 w-8 text-[#071326]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+              <path d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+            <span className="text-[10px] font-black uppercase text-[#071326]">TRADE</span>
+          </div>
+        </div>
+
+        {/* Right Container: WHAT WE GET */}
+        <div className="lg:w-1/3 rounded-3xl border-2 border-[#071326] bg-white p-6 sm:p-8 shadow-xl">
+           <div className="mb-8 flex justify-center">
+            <span className="rounded-lg bg-[#071326] px-4 py-1.5 font-primary text-sm font-bold tracking-widest text-white">
+              WHAT WE GET
+            </span>
+          </div>
+
+          <div className="flex items-center justify-center h-24">
+             {/* Coin Drop Visual */}
+             <div className="relative flex flex-col items-center">
+                {/* Hand (Simplified) */}
+                <div className="absolute -top-12 flex flex-col items-center animate-bounce duration-1000">
+                   <div className="h-6 w-4 rounded-full border-2 border-[#071326] bg-orange-100" />
+                   <div className="mt-2 h-6 w-6 rounded-full border-2 border-amber-500 bg-amber-100 flex items-center justify-center text-amber-600 font-black text-xs">
+                    €1
+                   </div>
+                </div>
+                {/* Collection Box */}
+                <div className="mt-4 relative h-16 w-24 rounded-lg border-2 border-[#071326] bg-slate-50 shadow-inner">
+                   <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-[#071326]" />
+                   <div className="mt-4 text-center text-[10px] font-bold text-slate-400 opacity-30">OUROBOROS</div>
+                </div>
+             </div>
+          </div>
+
+          <p className="mt-8 text-center font-primary text-xl font-bold leading-tight text-[#071326]">
+            We receive a small,<br /> one-time payment.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 const whyUsFeatures = [
   {
     title: "Affordable Prices",
@@ -212,13 +336,13 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center text-center lg:text-left">
           {/* Hero Content */}
           <div className="flex flex-col">
-            <h1 className="font-primary text-5xl font-bold tracking-tight text-primary-900 sm:text-6xl">
-              Premium Digital <br /> Products
+            <h1 className="font-primary text-4xl font-bold tracking-tight text-primary-900 sm:text-6xl">
+              Premium Digital < br /> Products
             </h1>
-            <p className="mt-4 font-secondary text-2xl italic font-semibold text-slate-800">
+            <p className="mt-4 font-secondary text-xl sm:text-2xl italic font-semibold text-slate-800">
               One stop shop for printers
             </p>
-            <p className="mx-auto lg:mx-0 mt-6 max-w-xl font-secondary text-lg text-primary-600">
+            <p className="mx-auto lg:mx-0 mt-6 max-w-xl font-secondary text-md sm:text-lg text-primary-600">
               Instant delivery. Quality guaranteed. Literature, education, stationary, and unique digital assets to help you succeed.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-4">
@@ -240,7 +364,8 @@ export default function Home() {
 
           {/* Hero Visual */}
           <div className="w-full">
-            <ValuePropositionVisual />
+            {/* <ValuePropositionVisual /> */}
+            <TradeVisual />
           </div>
         </div>
       </section>
@@ -250,8 +375,8 @@ export default function Home() {
         <div className="mx-auto max-w-[90rem] px-6 sm:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="font-primary text-2xl sm:text-3xl font-bold text-primary-900">Shop by Category</h2>
-              <p className="mt-1 font-secondary text-primary-600 text-lg">Find exactly what you need</p>
+              <h2 className="font-primary text-xl sm:text-3xl font-bold text-primary-900">Shop by Category</h2>
+              <p className="mt-1 font-secondary text-primary-600 text-md sm:text-lg">Find exactly what you need</p>
             </div>
             <Link to="/shop" className="inline-flex items-center gap-1 font-secondary font-medium text-secondary-600 hover:text-secondary-700">
               View all
@@ -308,7 +433,7 @@ export default function Home() {
                 <h3 className="mt-6 font-primary text-xl font-bold text-primary-900">
                   {feature.title}
                 </h3>
-                <p className="mt-2 font-secondary text-primary-600 leading-relaxed">
+                <p className="mt-2 font-secondary text-primary-600 leading-relaxed text-md sm:text-lg">
                   {feature.description}
                 </p>
               </div>
@@ -359,8 +484,8 @@ export default function Home() {
       {/* Instant Digital Delivery */}
       <section className="border-t border-primary-200 bg-white py-32">
         <div className="mx-auto max-w-[90rem] px-6 text-center sm:px-8">
-          <h2 className="font-primary text-2xl sm:text-3xl font-bold text-primary-900">Instant Digital Delivery</h2>
-          <p className="mx-auto mt-3 max-w-2xl font-secondary text-primary-600 text-lg">
+          <h2 className="font-primary text-xl sm:text-3xl font-bold text-primary-900">Instant Digital Delivery</h2>
+          <p className="mx-auto mt-3 max-w-2xl font-secondary text-primary-600 text-md sm:text-lg">
             All products are delivered instantly after purchase. Download your files or access your content immediately via email or your account.
           </p>
           <div className="mx-auto mt-12 grid max-w-2xl gap-8 sm:grid-cols-2">

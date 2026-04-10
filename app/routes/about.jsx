@@ -27,6 +27,16 @@ function MapPinIcon() {
   );
 }
 
+function InstagramIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary-700">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
 function SendIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -61,7 +71,7 @@ export default function About() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, message, userId: user?.id || null }),
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to send message");
 
@@ -83,15 +93,18 @@ export default function About() {
     <div className="mx-auto max-w-[90rem] px-6 py-12 sm:px-8">
       <section className="mb-16">
         <h1 className="font-primary text-3xl font-bold text-primary-900">About Us</h1>
-        <div className="mt-6 max-w-3xl space-y-4 font-secondary text-primary-900">
+        <div className="mt-6 max-w-3xl space-y-4 font-secondary text-primary-900 leading-relaxed">
           <p>
-            We are a small team passionate about helping individuals and businesses succeed through high-quality digital resources. Our products are carefully crafted to save you time and provide real value.
+            Inspired by the ancient concept of the Ouroboros, a symbol of infinity and continuous renewal, our digital printables are designed to offer limitless value through a single purchase. Each product you receive is not just a file, but the result of extensive creative effort, thoughtful ideation, and meticulous design execution.
           </p>
           <p>
-            Every template, e-book, course, and graphic in our collection is designed with clarity and usability in mind. We believe in instant access—no waiting, no shipping—so you can start using your purchases right away.
+            Every piece in our collection is carefully crafted by our team, going through multiple stages of refinement and review before reaching its final form. We are committed to maintaining high artistic standards while ensuring that our designs remain respectful, inclusive, and reflective of the diverse cultures and values that shape our world.
           </p>
           <p>
-            Thank you for choosing Ouroboros Printables. We are here to support you on your journey.
+            Our mission is to provide printers, publishers, and small business owners with high-quality, ready-to-use digital printables that are both original and affordable. Whether you are starting your own printing business or expanding your product range, our designs offer a convenient and cost-effective solution.
+          </p>
+          <p className="font-semibold text-primary-800">
+            With prices starting from just €1.99, we make premium digital content accessible without compromising on quality.
           </p>
         </div>
       </section>
@@ -112,13 +125,29 @@ export default function About() {
                 <a href="mailto:support@ouroborosprintables.com" className="font-secondary text-primary-900 underline hover:text-primary-700">support@ouroborosprintables.com</a>
               </div>
             </div>
-            <div className="flex gap-4">
+            {/* <div className="flex gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-200">
                 <MapPinIcon />
               </div>
               <div>
                 <p className="font-secondary font-semibold text-primary-900">Location</p>
                 <p className="font-secondary text-primary-900">United Kingdom</p>
+              </div>
+            </div> */}
+            <div className="flex gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary-200">
+                <InstagramIcon />
+              </div>
+              <div>
+                <p className="font-secondary font-semibold text-primary-900">Instagram</p>
+                <a
+                  href="https://www.instagram.com/ouroboros_printables?igsh=enhlcjV2NWQ3N2I3"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-secondary text-primary-900 underline hover:text-primary-700"
+                >
+                  @ouroboros_printables
+                </a>
               </div>
             </div>
           </div>

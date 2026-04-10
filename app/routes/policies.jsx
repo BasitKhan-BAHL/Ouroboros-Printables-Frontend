@@ -11,52 +11,110 @@ const policies = [
   {
     id: "privacy",
     title: "Privacy Policy",
-    open: true,
+    open: false,
     content: (
-      <>
-        <p className="mb-3 font-secondary text-primary-800">
-          We collect only the information necessary to process your orders and improve your experience. This includes your name, email address, and payment details when you make a purchase.
-        </p>
-        <p className="mb-3 font-secondary text-primary-800">
-          We do not sell or share your personal data with third parties for marketing purposes. Your data may be shared with trusted service providers who assist us in operating our store and processing payments, under strict confidentiality agreements.
-        </p>
-        <p className="mb-3 font-secondary text-primary-800">
-          We use cookies and similar technologies to remember your preferences and understand how you use our site. You can control cookie settings through your browser.
-        </p>
-        <p className="font-secondary text-primary-800">
-          You have the right to access, correct, or delete your personal information at any time. Contact us at support@ouroborosprintables.com for any requests or questions about your data.
-        </p>
-      </>
+      <div className="space-y-4 font-secondary text-primary-800">
+        <p>We collect necessary information such as name, email, and billing details to process orders. We do not sell your data to third parties for marketing.</p>
+        <p>We use cookies to maintain functionality and analyze site usage. You have the right to access, correct, or delete your personal data by contacting support.</p>
+        <p className="text-sm">For Paddle's privacy practices, please refer to their official documentation as the merchant of record.</p>
+      </div>
     ),
   },
   {
-    id: "refund",
-    title: "Refund Policy",
-    open: false,
+    id: "licensing",
+    title: "Licensing & Usage",
+    open: true,
     content: (
-      <p className="font-secondary text-primary-800">
-        Due to the digital nature of our products, we generally do not offer refunds once a download has been accessed. If you experience technical issues or have not received your product, please contact us and we will work to resolve the issue.
-      </p>
+      <div className="space-y-4 font-secondary text-primary-800">
+        <p className="font-semibold text-primary-900">Get started by creating an account and purchasing a license. Our model supports your business growth:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>All products are sold as digital PDF files.</li>
+          <li>Commercial use is permitted for physical (hardcopy) products only.</li>
+          <li>You are free to print and sell the designs under your own brand.</li>
+          <li>You may set your own pricing for the final physical products.</li>
+        </ul>
+        <p className="rounded-lg bg-amber-50 p-3 italic text-amber-800 border border-amber-100">
+          Please note that resale or distribution of the digital files in their original or modified form is not permitted.
+        </p>
+      </div>
     ),
   },
   {
     id: "terms",
-    title: "Terms & Conditions",
+    title: "Licensing Terms",
     open: false,
     content: (
-      <p className="font-secondary text-primary-800">
-        By purchasing from Ouroboros Printables, you agree to use our products for personal or commercial use as specified in each product’s license. Redistribution or resale of our digital files is prohibited unless explicitly stated otherwise.
-      </p>
+      <div className="space-y-6 font-secondary text-primary-800">
+        <div>
+          <h4 className="font-bold text-primary-900 uppercase text-xs tracking-wider mb-2">1. Commercial Use License</h4>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>Permits printing and selling physical items to end customers (retail).</li>
+            <li>You may add your own business name or logo to the printed product.</li>
+            <li>Pricing starts from €10.99 (subject to change).</li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-bold text-primary-900 uppercase text-xs tracking-wider mb-2">2. Extended Commercial Use License</h4>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>Permits selling physical items to both business and non-business customers.</li>
+            <li>You may add your own business name or logo to the printed product.</li>
+            <li>Pricing starts from €20.99 (subject to change).</li>
+          </ul>
+        </div>
+        <div className="border-t border-primary-100 pt-4">
+          <p><span className="font-bold">License Duration:</span> All licenses are valid for one (1) month from purchase. Continued use requires renewal.</p>
+          <p className="mt-2 text-sm italic">Licenses are non-transferable and all rights not expressly granted remain reserved by Ouroboros.</p>
+        </div>
+      </div>
     ),
   },
   {
-    id: "updates",
-    title: "Updates & Announcements",
+    id: "disclaimer",
+    title: "Disclaimer & Terms of Use",
     open: false,
     content: (
-      <p className="font-secondary text-primary-800">
-        We may update our policies from time to time. Significant changes will be communicated via email or a notice on our website. Continued use of our services after updates constitutes acceptance of the revised policies.
-      </p>
+      <div className="space-y-4 font-secondary text-primary-800">
+        <p>All finished designs are the intellectual property of Ouroboros and protected by copyright. Unauthorized reproduction or digital resale is strictly prohibited.</p>
+        <p>All products are test-printed, but results may vary based on your equipment. Our products are intended for <span className="font-bold">paper products only</span>.</p>
+        <p className="font-bold text-primary-900 underline">Ouroboros does not use AI-generated content in its designs.</p>
+        <p>If you experience quality issues, contact us with your order number, proof of payment, and photos of the printed issue. We will respond within 1–2 business days.</p>
+      </div>
+    ),
+  },
+  {
+    id: "purchases",
+    title: "Purchases & Refund Policy",
+    open: false,
+    content: (
+      <div className="space-y-4 font-secondary text-primary-800">
+        <div>
+          <h4 className="font-bold text-primary-900 mb-1">About Paddle</h4>
+          <p>Paddle acts as our authorized reseller and payment processor. They are the merchant of record and handle secure transactions and tax collection.</p>
+        </div>
+        <div>
+          <h4 className="font-bold text-primary-900 mb-1">Refunds</h4>
+          <p>Due to the nature of digital products, all sales are generally final. Refunds may be granted only if a file contains a persistent technical fault that cannot be resolved by our support team.</p>
+        </div>
+        <p className="text-sm italic">Files are available for download immediately after successful payment.</p>
+      </div>
+    ),
+  },
+  {
+    id: "copyright",
+    title: "Copyright & License Notice",
+    open: false,
+    content: (
+      <div className="space-y-4 font-secondary text-primary-800">
+        <p>Digital files remain the property of Ouroboros. You are granted a limited, non-exclusive, non-transferable monthly license.</p>
+        <h4 className="font-bold text-primary-900">Prohibited Actions:</h4>
+        <ul className="list-disc pl-5 space-y-1 text-sm">
+          <li>Reselling, sharing, or sublicensing the digital file.</li>
+          <li>Uploading to marketplaces or cloud storage.</li>
+          <li>Removing copyright notices or watermarks.</li>
+          <li>Allowing others to extract the digital file from your product.</li>
+        </ul>
+        <p className="bg-red-50 p-2 text-xs text-red-700 border border-red-100 rounded">Violations may result in immediate revocation of rights and legal action.</p>
+      </div>
     ),
   },
 ];
