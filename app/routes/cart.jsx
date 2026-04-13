@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router";
-import { getCategoryImage } from "../catalog";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 
@@ -63,7 +62,7 @@ export default function Cart() {
                 <div className="flex gap-3 sm:gap-5 flex-1 min-w-0">
                   <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 overflow-hidden rounded-lg bg-secondary-100">
                     <img
-                      src={getCategoryImage(item.product.categoryId)}
+                      src={item.categoryImage}
                       alt={item.product.title}
                       className="h-full w-full object-cover"
                     />

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { initializePaddle } from "@paddle/paddle-js";
-import { getCategoryImage } from "../catalog";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import PhoneInput from "react-phone-number-input";
@@ -253,7 +252,7 @@ export default function Checkout() {
                 <div key={item.productId} className="flex gap-4">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-secondary-100">
                     <img
-                      src={getCategoryImage(item.product.categoryId)}
+                      src={item.categoryImage}
                       alt={item.product.title}
                       className="h-full w-full object-cover"
                     />

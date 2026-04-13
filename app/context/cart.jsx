@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useReducer } from "react";
-import { formatPrice, getProduct } from "../catalog";
+import { createContext, useContext, useEffect, useState, useMemo, useReducer } from "react";
+import { formatPrice, getProduct, getCategories } from "../catalog";
 
 const CartContext = createContext(null);
 
@@ -72,6 +72,9 @@ export function CartProvider({ children }) {
     }
   });
 
+  const [productsCache, setProductsCache] = useState({});
+  const [categoriesCache, setCategoriesCache] = useState({});
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -81,16 +84,60 @@ export function CartProvider({ children }) {
     }
   }, [state]);
 
+  // Fetch missing products dynamically
+  useEffect(() => {
+    async function loadMissingProducts() {
+      const missingIds = state.items
+        .map((i) => i.productId)
+        .filter((id) => !productsCache[id]);
+
+      if (missingIds.length > 0) {
+        try {
+          const results = await Promise.all(missingIds.map((id) => getProduct(id)));
+          setProductsCache((prev) => {
+            const next = { ...prev };
+            missingIds.forEach((id, index) => {
+              if (results[index]) next[id] = results[index];
+            });
+            return next;
+          });
+        } catch (err) {
+          console.error("Failed to load products for cart:", err);
+        }
+      }
+    }
+    loadMissingProducts();
+  }, [state.items, productsCache]);
+
+  // Optionally load categories to display images efficiently
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const cats = await getCategories();
+        const map = {};
+        cats.forEach((c) => {
+          map[c._id || c.slug] = c.image;
+        });
+        setCategoriesCache(map);
+      } catch (err) {
+        console.error("Failed to load categories for cart imagery:", err);
+      }
+    }
+    loadCategories();
+  }, []);
+
   const value = useMemo(() => {
     const detailedItems = state.items
       .map(({ productId, quantity }) => {
-        const product = getProduct(productId);
+        const product = productsCache[productId];
         if (!product) return null;
         const lineTotal = product.price * quantity;
+        const categoryImage = categoriesCache[product.categoryId] || "/db-images/1.jpeg";
         return {
           productId,
           quantity,
           product,
+          categoryImage,
           lineTotal,
           lineTotalFormatted: formatPrice(lineTotal),
         };
@@ -113,7 +160,7 @@ export function CartProvider({ children }) {
       removeItem: (productId) => dispatch({ type: "REMOVE", productId }),
       clear: () => dispatch({ type: "CLEAR" }),
     };
-  }, [state]);
+  }, [state, productsCache, categoriesCache]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
