@@ -4,4 +4,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [reactRouter(), tailwindcss()],
+  ssr: {
+    noExternal: ["react-phone-number-input", "libphonenumber-js"],
+  },
 });
