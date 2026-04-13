@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
-import { categories, products, formatPrice, getCategoryImage } from "../catalog";
+import { getCategories } from "../catalog";
 
 export function meta() {
   return [
@@ -312,6 +312,8 @@ const whyUsFeatures = [
 
 export default function Home() {
   const [productCount, setProductCount] = useState("500+");
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   useEffect(() => {
     const fetchCount = async () => {
@@ -326,7 +328,22 @@ export default function Home() {
         console.error("Failed to fetch product count", err);
       }
     };
+    
+    const loadCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const data = await getCategories();
+        // Since home page shows top 4, we slice the first 4
+        setCategories(data.slice(0, 4));
+      } catch (err) {
+        console.error("Failed to load categories", err);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
     fetchCount();
+    loadCategories();
   }, []);
 
   return (
@@ -384,27 +401,41 @@ export default function Home() {
             </Link>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                to={`/shop/category/${cat.slug}`}
-                className="overflow-hidden rounded-xl bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-              >
-                <div className="aspect-[4/3] overflow-hidden rounded-lg bg-primary-100">
-                  <img
-                    src={getCategoryImage(cat.slug)}
-                    alt={cat.title}
-                    className="h-full w-full object-cover"
-                  />
+            {loadingCategories ? (
+              // Skeleton Loaders
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="overflow-hidden rounded-xl bg-white p-6 shadow-md border border-slate-100">
+                  <div className="aspect-[4/3] rounded-lg bg-slate-200 animate-pulse"></div>
+                  <div className="mt-4 h-5 w-3/4 rounded bg-slate-200 animate-pulse"></div>
+                  <div className="mt-2 h-4 w-full rounded bg-slate-200 animate-pulse"></div>
+                  <div className="mt-1 h-4 w-2/3 rounded bg-slate-200 animate-pulse"></div>
+                  <div className="mt-4 h-4 w-1/3 rounded bg-slate-200 animate-pulse"></div>
                 </div>
-                <h3 className="mt-4 font-primary font-semibold text-primary-900">{cat.title}</h3>
-                <p className="mt-1 font-secondary text-sm text-primary-600">{cat.description}</p>
-                <span className="mt-3 inline-flex items-center gap-1 font-secondary text-sm font-medium text-secondary-600">
-                  Browse collection
-                  <ArrowRight />
-                </span>
-              </Link>
-            ))}
+              ))
+            ) : (
+              categories.map((cat) => (
+                <Link
+                  key={cat._id || cat.slug}
+                  to={`/shop/category/${cat._id || cat.slug}`}
+                  className="overflow-hidden rounded-xl bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+                >
+                  <div className="aspect-[4/3] overflow-hidden rounded-lg bg-primary-100">
+                    <img
+                      src={cat.image}
+                      alt={cat.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <h3 className="mt-4 font-primary font-semibold text-primary-900">{cat.title}</h3>
+                  <p className="mt-1 font-secondary text-sm text-primary-600">{cat.description}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 font-secondary text-sm font-medium text-secondary-600">
+                    Browse collection
+                    <ArrowRight />
+                  </span>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </section>

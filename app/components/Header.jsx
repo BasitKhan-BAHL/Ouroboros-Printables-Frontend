@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate, useLocation } from "react-router";
 import logo from "../assets/logo.jpeg";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
@@ -42,10 +42,20 @@ function CloseIcon() {
   );
 }
 
+function BackIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary-900">
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  );
+}
+
 export function Header() {
   const { totalQuantity } = useCart();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -53,10 +63,17 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-primary-200 bg-primary-50 shadow-sm">
       <nav className="mx-auto flex max-w-[90rem] items-center justify-between px-6 py-4 sm:px-8">
-        <NavLink to="/" className="flex items-center gap-2 font-primary text-primary-900" onClick={closeMobileMenu}>
-          <img src={logo} alt="Ouroboros Printables" className="h-10 w-10 rounded-full object-cover" />
-          <span className="font-semibold">Ouroboros Printables</span>
-        </NavLink>
+        <div className="flex items-center gap-1 sm:gap-2">
+          {location.pathname !== '/' && (
+            <button onClick={() => navigate(-1)} aria-label="Go Back" className="md:hidden flex h-8 w-8 -ml-2 items-center justify-center rounded-full hover:bg-primary-100 text-primary-900">
+              <BackIcon />
+            </button>
+          )}
+          <NavLink to="/" className="flex items-center gap-2 font-primary text-primary-900" onClick={closeMobileMenu}>
+            <img src={logo} alt="Ouroboros Printables" className="h-10 w-10 rounded-full object-cover" />
+            <span className="font-semibold hidden sm:inline-block">Ouroboros Printables</span>
+          </NavLink>
+        </div>
 
         {/* Desktop Navigation */}
         <ul className="hidden md:flex flex-1 items-center justify-center gap-8">
