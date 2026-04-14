@@ -1,0 +1,15 @@
+{
+  "short_name": "Ouroboros",
+  "name": "Ouroboros Printables",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#071326",
+  "background_color": "#ffffff"
+}

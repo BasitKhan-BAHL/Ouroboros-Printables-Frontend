@@ -3,9 +3,23 @@ import { Link } from "react-router";
 import { getCategories } from "../catalog";
 
 export function meta() {
+  const title = "Ouroboros Printables – High-Quality Instant Product Kits";
+  const description = "Discover premium printable escape rooms, coloring packs, and stationary. Instant PDF downloads with commercial licensing for unlimited creative power.";
+
   return [
-    { title: "Ouroboros Printables" },
-    { name: "description", content: "Premium digital products – templates, e-books, courses, and graphics." },
+    { title },
+    { name: "description", content: description },
+    
+    // Open Graph
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:url", content: "https://ouroborosprintables.com" },
+    { property: "og:image", content: "https://ouroborosprintables.com/favicon.svg" }, // Usually a larger hero image is better, but this is a start
+    
+    // Twitter
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+    { name: "twitter:image", content: "https://ouroborosprintables.com/favicon.svg" },
   ];
 }
 

@@ -30,14 +30,44 @@ export const links = () => [
     type: "image/svg+xml",
     href: "/favicon.svg",
   },
+  { rel: "apple-touch-icon", href: "/favicon.svg" },
+  { rel: "manifest", href: "/manifest.json" },
 ];
 
 export function Layout({ children }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Ouroboros Printables",
+    "url": "https://ouroborosprintables.com",
+    "logo": "https://ouroborosprintables.com/favicon.svg",
+    "description": "Premium digital escape rooms, coloring packs, and educational stationary.",
+    "sameAs": [
+      // Add social links here if any
+    ]
+  };
+
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#071326" />
+        <meta name="author" content="Ouroboros Printables" />
+        <meta name="robots" content="index, follow" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Ouroboros Printables" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        
         <Meta />
         <Links />
       </head>
