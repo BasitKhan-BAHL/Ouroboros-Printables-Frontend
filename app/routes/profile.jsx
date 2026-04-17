@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../context/auth";
 import { useCart } from "../context/cart";
+import { useSettings } from "../context/settings";
+import { formatPrice } from "../catalog";
 
 export function meta() {
   return [
@@ -63,8 +65,21 @@ function StatusBadge({ status }) {
   );
 }
 
+function getAvatarColor(name = "") {
+  const colors = [
+    "bg-blue-500", "bg-purple-500", "bg-pink-500", "bg-indigo-500", 
+    "bg-teal-500", "bg-emerald-500", "bg-rose-500", "bg-amber-500"
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
 // ─── Order Row ────────────────────────────────────────────────────────────────
 function OrderRow({ order }) {
+  const { currency } = useSettings();
   const [open, setOpen] = useState(false);
   const shortId = order._id?.toString().slice(-8).toUpperCase();
 
@@ -84,7 +99,7 @@ function OrderRow({ order }) {
           <p className="mt-0.5 font-secondary text-xs text-primary-500">{formatDate(order.createdAt)}</p>
         </div>
         <div className="flex items-center gap-4 shrink-0">
-          <span className="font-primary font-bold text-primary-900">£{order.total?.toFixed(2)}</span>
+          <span className="font-primary font-bold text-primary-900">{formatPrice(order.total, currency)}</span>
           <ChevronIcon open={open} />
         </div>
       </button>
@@ -105,7 +120,7 @@ function OrderRow({ order }) {
                 <tr key={i} className="border-b border-primary-100 last:border-0">
                   <td className="py-2 font-secondary text-sm text-primary-900">{item.title}</td>
                   <td className="py-2 text-center font-secondary text-sm text-primary-600">{item.quantity}</td>
-                  <td className="py-2 text-right font-secondary text-sm text-primary-600">£{(item.price * item.quantity).toFixed(2)}</td>
+                  <td className="py-2 text-right font-secondary text-sm text-primary-600">{formatPrice(item.price * item.quantity, currency)}</td>
                 </tr>
               ))}
             </tbody>
@@ -223,11 +238,24 @@ export default function Profile() {
     <div className="mx-auto max-w-4xl px-6 py-16 sm:px-8">
       {/* Header */}
       <div className="flex items-center gap-6">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary-200 text-primary-900">
-          {user.avatar
-            ? <img src={user.avatar} alt={user.name} className="h-20 w-20 rounded-full object-cover" />
-            : <UserIcon />
-          }
+        <div className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-white shadow-sm overflow-hidden ${!user.avatar ? getAvatarColor(user.name) : "bg-primary-200"}`}>
+          {user.avatar ? (
+            <img 
+              src={user.avatar} 
+              alt={user.name} 
+              className="h-20 w-20 rounded-full object-cover"
+              onError={(e) => {
+                // If image fails to load, clear it so we show initials
+                e.target.style.display = 'none';
+                e.target.parentNode.classList.add(getAvatarColor(user.name));
+                e.target.parentNode.innerHTML = `<span class="font-primary text-3xl font-bold uppercase">${user.name?.[0] || "?"}</span>`;
+              }}
+            />
+          ) : (
+            <span className="font-primary text-3xl font-bold uppercase">
+              {user.name?.[0] || "?"}
+            </span>
+          )}
         </div>
         <div>
           <h1 className="font-primary text-3xl font-bold text-primary-900">Welcome, {user.name}</h1>

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useMemo, useReducer } from "react";
 import { formatPrice, getProduct, getCategories } from "../catalog";
+import { useSettings } from "./settings";
 
 const CartContext = createContext(null);
 
@@ -59,6 +60,7 @@ function cartReducer(state, action) {
 const initialState = { items: [] };
 
 export function CartProvider({ children }) {
+  const { currency } = useSettings();
   const [state, dispatch] = useReducer(cartReducer, initialState, (initial) => {
     if (typeof window === "undefined") return initial;
     try {
@@ -139,7 +141,7 @@ export function CartProvider({ children }) {
           product,
           categoryImage,
           lineTotal,
-          lineTotalFormatted: formatPrice(lineTotal),
+          lineTotalFormatted: formatPrice(lineTotal, currency),
         };
       })
       .filter(Boolean);
@@ -150,9 +152,9 @@ export function CartProvider({ children }) {
     return {
       items: detailedItems,
       subtotal,
-      subtotalFormatted: formatPrice(subtotal),
+      subtotalFormatted: formatPrice(subtotal, currency),
       total: subtotal,
-      totalFormatted: formatPrice(subtotal),
+      totalFormatted: formatPrice(subtotal, currency),
       totalQuantity,
       addItem: (productId) => dispatch({ type: "ADD_ITEM", productId }),
       increment: (productId) => dispatch({ type: "INCREMENT", productId }),
@@ -160,7 +162,7 @@ export function CartProvider({ children }) {
       removeItem: (productId) => dispatch({ type: "REMOVE", productId }),
       clear: () => dispatch({ type: "CLEAR" }),
     };
-  }, [state, productsCache, categoriesCache]);
+  }, [state, productsCache, categoriesCache, currency]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

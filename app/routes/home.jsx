@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { getCategories } from "../catalog";
+import { useSettings } from "../context/settings";
+import { formatPrice } from "../catalog";
 
 export function meta() {
   const title = "Ouroboros Printables – High-Quality Instant Product Kits";
@@ -49,7 +51,7 @@ function ValuePropositionVisual() {
           </h3>
           <div className="mt-10 sm:mt-16 flex items-center justify-center">
             <span className="font-primary text-6xl sm:text-[70px] lg:text-[60px] xl:text-[80px] leading-none font-black text-[#f1ab44] drop-shadow-sm">
-              €
+              {currency}
             </span>
           </div>
         </div>
@@ -97,7 +99,7 @@ function ValuePropositionVisual() {
                     <div className="absolute left-1.5 top-0 h-full w-[1.5px] bg-white/30" />
                     <div className="absolute -bottom-1 right-1.5 h-3 w-1.5 sm:h-3.5 sm:w-2 bg-[#8fcbd1] shadow-sm transform rotate-3" />
                   </div>
-                  <span className="mt-1.5 sm:mt-2 font-primary text-base sm:text-lg lg:text-base xl:text-lg font-black text-[#f1ab44] drop-shadow-sm">€</span>
+                  <span className="mt-1.5 sm:mt-2 font-primary text-base sm:text-lg lg:text-base xl:text-lg font-black text-[#f1ab44] drop-shadow-sm">{currency}</span>
                 </div>
               ))}
             </div>
@@ -117,6 +119,7 @@ function ValuePropositionVisual() {
 }
 
 function TradeVisual() {
+  const { currency } = useSettings();
   return (
     <div className="mx-auto mt-12 lg:mt-0 w-full max-w-4xl">
       {/* Top Title Box */}
@@ -182,7 +185,7 @@ function TradeVisual() {
               <div className="relative flex h-14 w-20 flex-col items-center justify-center rounded-lg border-2 border-[#071326] bg-green-50 shadow-sm transition-transform hover:scale-110">
                 <div className="absolute -top-1 left-1 h-full w-full rounded-lg border-2 border-[#071326] bg-white" />
                 <div className="z-10 flex h-6 w-10 items-center justify-center rounded-full border-2 border-green-600 bg-green-100 font-black text-green-700">
-                  <span className="text-xs">€</span>
+                  <span className="text-xs">{currency}</span>
                 </div>
               </div>
             </div>
@@ -219,7 +222,7 @@ function TradeVisual() {
                 <div className="absolute -top-12 flex flex-col items-center animate-bounce duration-1000">
                    <div className="h-6 w-4 rounded-full border-2 border-[#071326] bg-orange-100" />
                    <div className="mt-2 h-6 w-6 rounded-full border-2 border-amber-500 bg-amber-100 flex items-center justify-center text-amber-600 font-black text-xs">
-                    €1
+                    {currency}1
                    </div>
                 </div>
                 {/* Collection Box */}
@@ -325,7 +328,8 @@ const whyUsFeatures = [
 ];
 
 export default function Home() {
-  const [productCount, setProductCount] = useState("500+");
+  const { currency } = useSettings();
+  const [productCount, setProductCount] = useState("00");
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -518,7 +522,7 @@ export default function Home() {
                     />
                   </div>
                   <h3 className="mt-4 font-primary font-semibold text-primary-900">{product.title}</h3>
-                  <p className="mt-1 font-secondary text-primary-700">{formatPrice(product.price)}</p>
+                  <p className="mt-1 font-secondary text-primary-700">{formatPrice(product.price, currency)}</p>
                 </Link>
               )
             })}

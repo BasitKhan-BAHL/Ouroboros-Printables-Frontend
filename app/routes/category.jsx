@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router";
 import { formatPrice, getCategory, getProducts } from "../catalog";
+import { useSettings } from "../context/settings";
 
 export function meta() {
   return [
@@ -10,6 +11,7 @@ export function meta() {
 }
 
 export default function Category() {
+  const { currency } = useSettings();
   const { categoryId } = useParams();
   const [category, setCategory] = useState(null);
   const [products, setProducts] = useState([]);
@@ -21,10 +23,10 @@ export default function Category() {
         setLoading(true);
         const [catData, prodData] = await Promise.all([
           getCategory(categoryId),
-          getProducts(categoryId)
+          getProducts({ categoryId })
         ]);
         setCategory(catData);
-        setProducts(prodData);
+        setProducts(prodData || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -80,7 +82,7 @@ export default function Category() {
               </div>
               <div className="p-6">
                 <h2 className="font-primary font-semibold text-primary-900">{product.title}</h2>
-                <p className="mt-1 font-secondary text-primary-700">{formatPrice(product.price)}</p>
+                <p className="mt-1 font-secondary text-primary-700">{formatPrice(product.price, currency)}</p>
               </div>
             </Link>
           ))

@@ -18,5 +18,6 @@ export default [
     index("routes/admin._index.jsx"),
     route("categories", "routes/admin.categories.jsx"),
     route("products", "routes/admin.products.jsx"),
+    route("settings", "routes/admin.settings.jsx"),
   ]),
 ];

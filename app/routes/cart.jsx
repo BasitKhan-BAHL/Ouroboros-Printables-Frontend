@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
+import { useSettings } from "../context/settings";
+import { formatPrice } from "../catalog";
 
 export function meta() {
   return [
@@ -19,6 +21,7 @@ function RemoveIcon() {
 }
 
 export default function Cart() {
+  const { currency } = useSettings();
   const { items, subtotalFormatted, totalFormatted, totalQuantity, increment, decrement, removeItem } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -74,7 +77,7 @@ export default function Cart() {
                         {item.lineTotalFormatted}
                       </div>
                     </div>
-                    <p className="font-secondary text-primary-600">${item.product.price.toFixed(2)}</p>
+                    <p className="font-secondary text-primary-600">{formatPrice(item.product.price, currency)}</p>
                     <div className="mt-auto pt-4 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <button type="button" className="flex h-8 w-8 items-center justify-center rounded border border-primary-200 bg-white font-secondary text-primary-900" onClick={() => decrement(item.productId)}>−</button>
@@ -126,13 +129,13 @@ export default function Cart() {
               >
                 Proceed to Checkout
               </button>
-            ) : !user.license ? (
+            ) : user.license === "free" ? (
               <button
                 type="button"
                 onClick={() => navigate('/licenses?redirect=/checkout')}
                 className="block w-full rounded-lg bg-primary-900 py-3 text-center font-secondary font-medium text-white hover:bg-primary-800"
               >
-                Proceed to Checkout
+                Buy License to Continue
               </button>
             ) : (
               <Link

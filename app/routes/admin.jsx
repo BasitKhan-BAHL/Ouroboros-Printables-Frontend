@@ -56,14 +56,14 @@ export default function AdminLayout() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-primary-50 px-6 py-12">
         <div className="w-full max-w-md">
           <div className="mb-10 text-center">
-             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-900 shadow-xl">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-             </div>
-             <h1 className="font-primary text-3xl font-bold tracking-tight text-primary-900">Admin Login</h1>
-             <p className="mt-2 font-secondary text-primary-600">Secure access to catalog management</p>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-900 shadow-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h1 className="font-primary text-3xl font-bold tracking-tight text-primary-900">Admin Login</h1>
+            <p className="mt-2 font-secondary text-primary-600">Secure access to catalog management</p>
           </div>
 
           <div className="rounded-2xl border border-primary-200 bg-white p-8 shadow-xl">
@@ -73,7 +73,7 @@ export default function AdminLayout() {
                   {loginError}
                 </div>
               )}
-              
+
               <div>
                 <label className="block font-secondary text-sm font-medium text-primary-950 mb-2">Username</label>
                 <input
@@ -107,8 +107,8 @@ export default function AdminLayout() {
               </button>
             </form>
           </div>
-          
-          <button 
+
+          <button
             onClick={() => navigate("/")}
             className="mt-6 w-full text-center font-secondary text-sm text-primary-500 hover:text-primary-900 underline"
           >
@@ -140,10 +140,9 @@ export default function AdminLayout() {
                 to="/admin"
                 end
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-5 py-3.5 font-secondary font-semibold transition-all ${
-                    isActive
-                      ? "bg-primary-900 text-white shadow-md shadow-primary-900/10"
-                      : "bg-white text-primary-600 border border-primary-100 hover:bg-primary-100"
+                  `flex items-center gap-3 rounded-xl px-5 py-3.5 font-secondary font-semibold transition-all ${isActive
+                    ? "bg-primary-900 text-white shadow-md shadow-primary-900/10"
+                    : "bg-white text-primary-600 border border-primary-100 hover:bg-primary-100"
                   }`
                 }
               >
@@ -153,10 +152,9 @@ export default function AdminLayout() {
               <NavLink
                 to="/admin/categories"
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-5 py-3.5 font-secondary font-semibold transition-all ${
-                    isActive
-                      ? "bg-primary-900 text-white shadow-md shadow-primary-900/10"
-                      : "bg-white text-primary-600 border border-primary-100 hover:bg-primary-100"
+                  `flex items-center gap-3 rounded-xl px-5 py-3.5 font-secondary font-semibold transition-all ${isActive
+                    ? "bg-primary-900 text-white shadow-md shadow-primary-900/10"
+                    : "bg-white text-primary-600 border border-primary-100 hover:bg-primary-100"
                   }`
                 }
               >
@@ -166,19 +164,30 @@ export default function AdminLayout() {
               <NavLink
                 to="/admin/products"
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-5 py-3.5 font-secondary font-semibold transition-all ${
-                    isActive
-                      ? "bg-primary-900 text-white shadow-md shadow-primary-900/10"
-                      : "bg-white text-primary-600 border border-primary-100 hover:bg-primary-100"
+                  `flex items-center gap-3 rounded-xl px-5 py-3.5 font-secondary font-semibold transition-all ${isActive
+                    ? "bg-primary-900 text-white shadow-md shadow-primary-900/10"
+                    : "bg-white text-primary-600 border border-primary-100 hover:bg-primary-100"
                   }`
                 }
               >
                 <span>📚</span>
                 Products
               </NavLink>
-              
+              <NavLink
+                to="/admin/settings"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-xl px-5 py-3.5 font-secondary font-semibold transition-all ${isActive
+                    ? "bg-primary-900 text-white shadow-md shadow-primary-900/10"
+                    : "bg-white text-primary-600 border border-primary-100 hover:bg-primary-100"
+                  }`
+                }
+              >
+                <span>⚙️</span>
+                Settings
+              </NavLink>
+
               <div className="pt-8 mt-4 border-t border-primary-200">
-                <button 
+                <button
                   onClick={handleExit}
                   className="flex w-full items-center gap-3 rounded-xl px-5 py-3 font-secondary font-medium text-red-600 hover:bg-red-50 transition-colors"
                 >

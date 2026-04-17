@@ -31,10 +31,39 @@ function Spinner() {
   );
 }
 
+function LicenseCard({ license }) {
+  const tier = license || "free";
+  const cardClass =
+    tier === "enterprise"
+      ? "border-purple-200 bg-purple-50 text-purple-900"
+      : tier === "commercial"
+        ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+        : "border-amber-200 bg-amber-50 text-amber-900";
+
+  return (
+    <div className={`mt-3 rounded-lg border p-4 ${cardClass}`}>
+      <div className="flex items-center justify-between">
+        <p className="font-secondary text-xs font-semibold uppercase tracking-wide opacity-80">
+          Current License
+        </p>
+        <span className="rounded-full bg-white/70 px-2.5 py-1 font-secondary text-xs font-bold capitalize">
+          {tier}
+        </span>
+      </div>
+      <p className="mt-2 font-secondary text-sm">
+        {tier === "free"
+          ? "Upgrade to a paid license to continue checkout."
+          : "Your license is active and eligible for checkout."}
+      </p>
+    </div>
+  );
+}
+
 export default function Checkout() {
   const { items, subtotalFormatted, totalFormatted, totalQuantity, clear } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const hasPaidLicense = !!user?.license && user.license !== "free";
 
   const [phone, setPhone] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -106,6 +135,10 @@ export default function Checkout() {
       });
 
       const data = await res.json();
+      if (res.status === 403 && data.requiresLicense) {
+        navigate("/licenses?redirect=/checkout");
+        return;
+      }
       if (!res.ok) throw new Error(data.message || "Failed to place order");
 
       // Keep order in state so the Paddle callback can store it for the receipt
@@ -169,6 +202,7 @@ export default function Checkout() {
         <div className="order-1 lg:col-span-2 lg:col-start-1 lg:row-start-1">
           <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
             <h2 className="font-primary text-lg font-semibold text-primary-900">Your Details</h2>
+            <LicenseCard license={user?.license} />
             <div className="mt-4 space-y-4">
               <div>
                 <label htmlFor="checkout-email" className="block font-secondary text-sm font-medium text-primary-900">Email Address</label>
@@ -227,7 +261,7 @@ export default function Checkout() {
               id="btn-pay"
               type="button"
               onClick={handlePay}
-              disabled={isProcessing}
+              disabled={isProcessing || !hasPaidLicense}
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-900 py-3.5 font-secondary text-lg font-bold text-white shadow hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {isProcessing ? (
@@ -240,6 +274,19 @@ export default function Checkout() {
               )}
               {isProcessing ? "Processing..." : `Pay ${totalFormatted}`}
             </button>
+            {!hasPaidLicense && (
+              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 font-secondary text-sm text-amber-800">
+                A paid license is required before product checkout.
+                <button
+                  type="button"
+                  onClick={() => navigate("/licenses?redirect=/checkout")}
+                  className="ml-1 font-semibold underline underline-offset-2"
+                >
+                  Buy a license first
+                </button>
+                .
+              </div>
+            )}
           </div>
         </div>
 

@@ -36,10 +36,13 @@ export default function AdminCategories() {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Filter State
+  const [searchTerm, setSearchTerm] = useState("");
+
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const data = await getCategories();
+      const data = await getCategories({ search: searchTerm });
       setCategories(data);
     } catch (err) {
       console.error(err);
@@ -48,8 +51,12 @@ export default function AdminCategories() {
   };
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    const delayDebounceFn = setTimeout(() => {
+      fetchCategories();
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
 
   const openAddModal = () => {
     setEditingCategory(null);
@@ -107,8 +114,24 @@ export default function AdminCategories() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h2 className="font-primary text-xl font-bold text-primary-900">Categories</h2>
+        
+        <div className="relative flex-1 md:max-w-md">
+          <input
+            type="text"
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full rounded-lg border border-primary-200 bg-white px-4 py-2 pl-9 font-secondary text-sm text-primary-900 focus:border-primary-400 focus:outline-none"
+          />
+          <span className="absolute left-3 top-2.5 text-primary-400">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </span>
+        </div>
+
         <button
           onClick={openAddModal}
           className="rounded-lg bg-primary-900 px-4 py-2 font-secondary text-sm font-medium text-white hover:bg-primary-800"
@@ -117,7 +140,10 @@ export default function AdminCategories() {
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-primary-200 bg-white shadow-sm">
+      {loading && categories.length === 0 ? (
+        <div className="text-primary-600 font-secondary">Loading categories...</div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-primary-200 bg-white shadow-sm">
         <table className="w-full text-left font-secondary text-sm text-primary-900">
           <thead className="bg-primary-50">
             <tr>
@@ -155,6 +181,7 @@ export default function AdminCategories() {
           </tbody>
         </table>
       </div>
+      )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCategory ? "Edit Category" : "Add Category"}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-secondary">

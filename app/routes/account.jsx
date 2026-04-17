@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../context/auth";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 export function meta() {
   return [
@@ -221,6 +223,139 @@ function OtpScreen({ email, onSuccess, onBack }) {
   );
 }
 
+// ─── Complete Profile Screen ──────────────────────────────────────────────────
+function CompleteProfileScreen({ onComplete }) {
+  const { completeProfile, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const [formData, setFormData] = useState({
+    businessName: "",
+    businessNature: "",
+    businessSocial: "",
+    businessLocation: "",
+    phone: "",
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      await completeProfile(formData);
+      onComplete();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-16 sm:px-8">
+       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-900 shadow-sm">
+        <UserIcon />
+      </div>
+      <h1 className="mt-6 font-primary text-3xl font-bold text-primary-900 text-center">Complete Your Profile</h1>
+      <p className="mt-2 text-center font-secondary text-primary-600">
+        Please provide your business and contact details to proceed.
+      </p>
+
+      <div className="mt-8 w-full rounded-xl border border-primary-200 bg-white p-6 sm:p-8 shadow-sm">
+        {error && (
+          <div className="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 font-secondary text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label className="block font-secondary text-xs font-bold uppercase tracking-wider text-primary-500">Business Name</label>
+              <input
+                type="text"
+                required
+                value={formData.businessName}
+                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                placeholder="Ouroboros Inc."
+                className="mt-1.5 w-full rounded-lg border border-primary-200 bg-white px-4 py-2.5 font-secondary text-primary-900 outline-none transition focus:border-primary-900 focus:ring-2 focus:ring-primary-100"
+              />
+            </div>
+            <div>
+              <label className="block font-secondary text-xs font-bold uppercase tracking-wider text-primary-500">Nature of Business</label>
+              <input
+                type="text"
+                required
+                value={formData.businessNature}
+                onChange={(e) => setFormData({ ...formData, businessNature: e.target.value })}
+                placeholder="E-commerce, Tech, etc."
+                className="mt-1.5 w-full rounded-lg border border-primary-200 bg-white px-4 py-2.5 font-secondary text-primary-900 outline-none transition focus:border-primary-900 focus:ring-2 focus:ring-primary-100"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-secondary text-xs font-bold uppercase tracking-wider text-primary-500">Social Link (Insta/Web/FB/TikTok)</label>
+            <input
+              type="text"
+              required
+              value={formData.businessSocial}
+              onChange={(e) => setFormData({ ...formData, businessSocial: e.target.value })}
+              placeholder="https://instagram.com/yourbusiness"
+              className="mt-1.5 w-full rounded-lg border border-primary-200 bg-white px-4 py-2.5 font-secondary text-primary-900 outline-none transition focus:border-primary-900 focus:ring-2 focus:ring-primary-100"
+            />
+          </div>
+
+          <div>
+            <label className="block font-secondary text-xs font-bold uppercase tracking-wider text-primary-500">Location of Operation</label>
+            <input
+              type="text"
+              required
+              value={formData.businessLocation}
+              onChange={(e) => setFormData({ ...formData, businessLocation: e.target.value })}
+              placeholder="New York, USA (or Remote)"
+              className="mt-1.5 w-full rounded-lg border border-primary-200 bg-white px-4 py-2.5 font-secondary text-primary-900 outline-none transition focus:border-primary-900 focus:ring-2 focus:ring-primary-100"
+            />
+          </div>
+
+          <div>
+            <label className="block font-secondary text-xs font-bold uppercase tracking-wider text-primary-500">Phone Number</label>
+            <PhoneInput
+              international
+              defaultCountry="US"
+              required
+              value={formData.phone}
+              onChange={(val) => setFormData({ ...formData, phone: val || "" })}
+              placeholder="+1 (555) 000-0000"
+              className="mt-1.5 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 focus-within:border-primary-900 focus-within:ring-2 focus-within:ring-primary-100 [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:pl-2 [&_.PhoneInputInput]:focus:outline-none [&_.PhoneInputInput]:focus:ring-0"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-4 w-full flex justify-center items-center gap-2 rounded-lg bg-primary-900 py-3.5 font-secondary font-bold text-white hover:bg-primary-800 disabled:opacity-60 transition shadow-lg hover:shadow-xl active:scale-[0.98]"
+          >
+            {loading && <Spinner />}
+            {loading ? "Saving Profile..." : "Complete & Enter Store"}
+          </button>
+        </form>
+
+        <div className="mt-6 flex flex-col items-center border-t border-primary-100 pt-6">
+          <p className="font-secondary text-sm text-primary-500">Not your account? Or want to sign in later?</p>
+          <button
+            type="button"
+            onClick={logout}
+            className="mt-2 font-secondary text-sm font-bold text-primary-900 hover:text-primary-700 underline underline-offset-4"
+          >
+            Sign out and exit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Account Component ───────────────────────────────────────────────────
 // screen: "auth" | "otp"
 export default function Account() {
@@ -228,7 +363,7 @@ export default function Account() {
   const [screen, setScreen] = useState("auth"); // "auth" | "otp"
   const [pendingEmail, setPendingEmail] = useState("");
 
-  const { login, register, loginWithToken } = useAuth();
+  const { user, login, register, loginWithToken, isProfileComplete } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectParam = searchParams.get("redirect");
@@ -240,6 +375,11 @@ export default function Account() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [businessNature, setBusinessNature] = useState("");
+  const [businessSocial, setBusinessSocial] = useState("");
+  const [businessLocation, setBusinessLocation] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState(errorParam === "google_failed" ? "Google sign-in failed. Please try again." : "");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -252,7 +392,7 @@ export default function Account() {
       const url = new URL(window.location.href);
       url.searchParams.delete("token");
       window.history.replaceState({}, "", url.toString());
-      navigate(redirectParam || "/");
+      setVerifyingToken(false);
     }).catch(() => {
       setError("Google sign-in failed. Please try again.");
       setVerifyingToken(false);
@@ -286,7 +426,10 @@ export default function Account() {
     setError("");
     setLoading(true);
     try {
-      const result = await register(name, email, password);
+      const result = await register({
+        name, email, password,
+        businessName, businessNature, businessSocial, businessLocation, phone
+      });
       if (result.requiresOtp) {
         setPendingEmail(result.email);
         setScreen("otp");
@@ -304,6 +447,13 @@ export default function Account() {
     window.location.href = `${apiUrl}/auth/google`;
   };
 
+  // ── Redirect if already logged in and profile is complete ────────────────
+  useEffect(() => {
+    if (user && isProfileComplete && screen !== "otp") {
+       navigate(redirectParam || "/");
+    }
+  }, [user, isProfileComplete, navigate, redirectParam]);
+
   // ── Verifying Google token spinner ───────────────────────────────────────
   if (verifyingToken) {
     return (
@@ -314,6 +464,11 @@ export default function Account() {
         <p className="font-secondary text-primary-600 animate-pulse">Completing sign in...</p>
       </div>
     );
+  }
+
+  // ── Complete Profile Screen ──────────────────────────────────────────────
+  if (user && !isProfileComplete) {
+     return <CompleteProfileScreen onComplete={handleAuthSuccess} />;
   }
 
   // ── OTP Screen ────────────────────────────────────────────────────────────
@@ -435,43 +590,110 @@ export default function Account() {
             </form>
           ) : (
             <form id="form-create" onSubmit={handleCreateAccount} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block font-secondary text-sm font-medium text-primary-900">Buyer Name</label>
+                  <input
+                    id="input-create-name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Jane Doe"
+                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-secondary text-sm font-medium text-primary-900">Phone Number</label>
+                  <PhoneInput
+                    international
+                    defaultCountry="US"
+                    required
+                    value={phone}
+                    onChange={setPhone}
+                    placeholder="+1 (555) 000-0000"
+                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 focus-within:border-primary-400 focus-within:outline-none [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:pl-2 [&_.PhoneInputInput]:focus:outline-none [&_.PhoneInputInput]:focus:ring-0"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block font-secondary text-sm font-medium text-primary-900">Business Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    placeholder="Ouroboros Inc."
+                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-secondary text-sm font-medium text-primary-900">Nature of Business</label>
+                  <input
+                    type="text"
+                    required
+                    value={businessNature}
+                    onChange={(e) => setBusinessNature(e.target.value)}
+                    placeholder="E-commerce, etc."
+                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block font-secondary text-sm font-medium text-primary-900">Name</label>
+                <label className="block font-secondary text-sm font-medium text-primary-900">Business Location</label>
                 <input
-                  id="input-create-name"
                   type="text"
                   required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Jane Doe"
+                  value={businessLocation}
+                  onChange={(e) => setBusinessLocation(e.target.value)}
+                  placeholder="City, Country"
                   className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
                 />
               </div>
+
               <div>
-                <label className="block font-secondary text-sm font-medium text-primary-900">Email</label>
+                <label className="block font-secondary text-sm font-medium text-primary-900">Social Link (Insta/Web/FB/TikTok)</label>
                 <input
-                  id="input-create-email"
-                  type="email"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  value={businessSocial}
+                  onChange={(e) => setBusinessSocial(e.target.value)}
+                  placeholder="https://instagram.com/..."
                   className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
                 />
               </div>
-              <div>
-                <label className="block font-secondary text-sm font-medium text-primary-900">Password</label>
-                <input
-                  id="input-create-password"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
-                />
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block font-secondary text-sm font-medium text-primary-900">Email</label>
+                  <input
+                    id="input-create-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-secondary text-sm font-medium text-primary-900">Password</label>
+                  <input
+                    id="input-create-password"
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
+                  />
+                </div>
               </div>
+
               <p className="font-secondary text-xs text-primary-500">
                 A 6-digit verification code will be sent to your email.
               </p>

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { getStats, formatPrice } from "../catalog";
+import { useSettings } from "../context/settings";
 
 export default function AdminOverview() {
+  const { currency } = useSettings();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,7 +41,7 @@ export default function AdminOverview() {
   }
 
   const statCards = [
-    { label: "Total Revenue", value: `$${formatPrice(stats.revenue)}`, icon: "💰", color: "text-green-600" },
+    { label: "Total Revenue", value: formatPrice(stats.revenue, currency), icon: "💰", color: "text-green-600" },
     { label: "Total Orders", value: stats.orders, icon: "📦", color: "text-blue-600" },
     { label: "Categories", value: stats.categories, icon: "🏷️", color: "text-purple-600" },
     { label: "Products", value: stats.products, icon: "📚", color: "text-amber-600" },
@@ -64,7 +66,7 @@ export default function AdminOverview() {
       <div className="rounded-xl border border-primary-200 bg-white p-8 shadow-sm">
         <h3 className="font-primary text-xl font-bold text-primary-900 mb-4">Welcome back, Admin</h3>
         <p className="font-secondary text-primary-600 leading-relaxed">
-          This is your control center. Use the sidebar to manage your store's categories and products. 
+          This is your control center. Use the sidebar to manage your store's categories and products.
           Your current performance metrics are displayed above in real-time.
         </p>
       </div>

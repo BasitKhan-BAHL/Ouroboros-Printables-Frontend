@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getProducts, getCategories, createProduct, updateProduct, deleteProduct, formatPrice } from "../catalog";
+import { useSettings } from "../context/settings";
 
 function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
@@ -20,6 +21,7 @@ function Modal({ isOpen, onClose, title, children }) {
 }
 
 export default function AdminProducts() {
+  const { currency } = useSettings();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,21 +39,44 @@ export default function AdminProducts() {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchData = async () => {
+  // Filter State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeCategory, setActiveCategory] = useState("");
+
+  const fetchCategoriesData = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
+    }
+  };
+
+  const fetchProductsData = async () => {
     setLoading(true);
     try {
-      const [prodData, catData] = await Promise.all([getProducts(), getCategories()]);
-      setProducts(prodData);
-      setCategories(catData);
+      const data = await getProducts({ 
+        categoryId: activeCategory, 
+        search: searchTerm 
+      });
+      setProducts(data);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch products", err);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchData();
+    fetchCategoriesData();
   }, []);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchProductsData();
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, activeCategory]);
 
   const openAddModal = () => {
     setEditingProduct(null);
@@ -91,7 +116,7 @@ export default function AdminProducts() {
         await createProduct(payload);
       }
       setIsModalOpen(false);
-      await fetchData();
+      await fetchProductsData();
     } catch (err) {
       setFormError(err.message || "An error occurred");
     }
@@ -102,7 +127,7 @@ export default function AdminProducts() {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
       await deleteProduct(id);
-      await fetchData();
+      await fetchProductsData();
     } catch (err) {
       alert(err.message || "Failed to delete");
     }
@@ -113,12 +138,41 @@ export default function AdminProducts() {
     return cat ? cat.title : id;
   };
 
-  if (loading) return <div className="text-primary-600 font-secondary">Loading products...</div>;
-
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h2 className="font-primary text-xl font-bold text-primary-900">Products</h2>
+        
+        <div className="flex flex-1 flex-col gap-3 md:max-w-xl md:flex-row md:items-center">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-lg border border-primary-200 bg-white px-4 py-2 pl-9 font-secondary text-sm text-primary-900 focus:border-primary-400 focus:outline-none"
+            />
+            <span className="absolute left-3 top-2.5 text-primary-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+          </div>
+          
+          <select
+            value={activeCategory}
+            onChange={(e) => setActiveCategory(e.target.value)}
+            className="rounded-lg border border-primary-200 bg-white px-3 py-2 font-secondary text-sm text-primary-900 focus:border-primary-400 focus:outline-none"
+          >
+            <option value="">All Categories</option>
+            {categories.map((c) => (
+              <option key={c._id || c.slug} value={c._id || c.slug}>
+                {c.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <button
           onClick={openAddModal}
           className="rounded-lg bg-primary-900 px-4 py-2 font-secondary text-sm font-medium text-white hover:bg-primary-800"
@@ -127,13 +181,16 @@ export default function AdminProducts() {
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-primary-200 bg-white shadow-sm">
+      {loading && products.length === 0 ? (
+        <div className="text-primary-600 font-secondary">Loading products...</div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-primary-200 bg-white shadow-sm">
         <table className="w-full text-left font-secondary text-sm text-primary-900">
           <thead className="bg-primary-50">
             <tr>
               <th className="px-6 py-4 font-semibold text-primary-900">Product</th>
               <th className="px-6 py-4 font-semibold text-primary-900">Category</th>
-              <th className="px-6 py-4 font-semibold text-primary-900">Price</th>
+              <th className="px-6 py-4 font-semibold text-primary-900">Price ({currency})</th>
               <th className="px-6 py-4 text-right font-semibold text-primary-900">Actions</th>
             </tr>
           </thead>
@@ -151,7 +208,7 @@ export default function AdminProducts() {
                       {getCategoryName(prod.categoryId)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-medium">{formatPrice(prod.price)}</td>
+                  <td className="px-6 py-4 font-medium">{formatPrice(prod.price, currency)}</td>
                   <td className="px-6 py-4 text-right">
                     <button onClick={() => openEditModal(prod)} className="text-secondary-600 hover:text-secondary-800 mr-4 font-medium">Edit</button>
                     <button onClick={() => handleDelete(prodId)} className="text-red-500 hover:text-red-700 font-medium">Delete</button>
@@ -167,6 +224,7 @@ export default function AdminProducts() {
           </tbody>
         </table>
       </div>
+      )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingProduct ? "Edit Product" : "Add Product"}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-secondary">
@@ -193,7 +251,7 @@ export default function AdminProducts() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-primary-900">Price (EUR)</label>
+              <label className="mb-1 block text-sm font-medium text-primary-900">Price ({currency})</label>
               <input
                 type="number"
                 step="0.01"

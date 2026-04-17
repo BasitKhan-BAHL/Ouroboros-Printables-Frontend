@@ -44,6 +44,22 @@ export function AuthProvider({ children }) {
     setUser(userData);
   };
 
+  const refreshUser = async () => {
+    const token = getToken();
+    if (!token) return null;
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to refresh user");
+    setUser(data.user);
+    return data.user;
+  };
+
+  const applyLocalLicense = (license) => {
+    setUser((prev) => (prev ? { ...prev, license } : prev));
+  };
+
   const login = async (email, password) => {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
@@ -61,11 +77,11 @@ export function AuthProvider({ children }) {
   };
 
   // Step 1: Register — sends OTP email, does NOT log user in yet
-  const register = async (name, email, password) => {
+  const register = async (details) => {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify(details),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Registration failed");
@@ -134,12 +150,42 @@ export function AuthProvider({ children }) {
     setUser(data.user);
     return data.user;
   };
+  
+  const completeProfile = async (details) => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}/users/me`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(details),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to complete profile");
+    setUser(data.user);
+    return data.user;
+  };
+
+  const isProfileComplete = useMemo(() => {
+    if (!user) return false;
+    // Admin accounts should not be blocked by business profile completion flow.
+    if (user.isAdmin) return true;
+    return !!(
+      user.businessName &&
+      user.businessNature &&
+      user.businessSocial &&
+      user.businessLocation &&
+      user.phone
+    );
+  }, [user]);
 
   const value = useMemo(
     () => ({
       user,
-      isAuthenticated: !!user,
+      isAuthenticated: !!user && isProfileComplete,
       isInitializing,
+      isProfileComplete,
       login,
       register,
       verifyOtp,
@@ -147,8 +193,11 @@ export function AuthProvider({ children }) {
       logout,
       updateLicense,
       loginWithToken,
+      completeProfile,
+      refreshUser,
+      applyLocalLicense,
     }),
-    [user, isInitializing]
+    [user, isInitializing, isProfileComplete]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

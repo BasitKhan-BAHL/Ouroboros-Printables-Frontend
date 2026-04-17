@@ -1,10 +1,20 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-export async function getCategories() {
-  const res = await fetch(`${API_URL}/categories`);
+export async function getCategories(options = {}) {
+  const { search } = typeof options === "string" ? { search: options } : options;
+  const url = new URL(`${API_URL}/categories`);
+  if (search) url.searchParams.append("search", search);
+  
+  const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch categories");
   const data = await res.json();
   return data.categories;
+}
+
+export async function getSettings() {
+  const res = await fetch(`${API_URL}/settings`);
+  if (!res.ok) throw new Error("Failed to fetch settings");
+  return res.json();
 }
 
 export async function getCategory(slug) {
@@ -17,10 +27,12 @@ export async function getCategory(slug) {
   return data.category;
 }
 
-export async function getProducts(categoryId = null) {
-  const url = categoryId
-    ? `${API_URL}/products?category=${categoryId}`
-    : `${API_URL}/products`;
+export async function getProducts(options = {}) {
+  const { categoryId, search } = typeof options === "string" ? { categoryId: options } : options;
+  const url = new URL(`${API_URL}/products`);
+  if (categoryId) url.searchParams.append("category", categoryId);
+  if (search) url.searchParams.append("search", search);
+
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch products");
   const data = await res.json();
@@ -37,9 +49,9 @@ export async function getProduct(productId) {
   return data.product;
 }
 
-export function formatPrice(value) {
-  if (typeof value !== 'number') return "0.00";
-  return value.toFixed(2);
+export function formatPrice(value, symbol = "€") {
+  if (typeof value !== 'number') return `${symbol}0.00`;
+  return `${symbol}${value.toFixed(2)}`;
 }
 
 // ─── ADMIN API HELPERS ────────────────────────────────────────────────────────
@@ -115,5 +127,15 @@ export async function getStats() {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error("Failed to fetch stats");
+  return res.json();
+}
+
+export async function updateSettings(payload) {
+  const res = await fetch(`${API_URL}/settings`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to update settings");
   return res.json();
 }

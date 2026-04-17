@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../context/auth";
+import { useSettings } from "../context/settings";
+import { formatPrice } from "../catalog";
 
 export function meta() {
   return [
@@ -35,6 +37,7 @@ function StatusBadge({ status }) {
 }
 
 export default function Receipt() {
+  const { currency } = useSettings();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -225,9 +228,9 @@ export default function Receipt() {
                   <tr key={i} className="border-b border-primary-100">
                     <td className="py-3 font-secondary text-sm text-primary-900">{item.title}</td>
                     <td className="py-3 text-center font-secondary text-sm text-primary-700">{item.quantity}</td>
-                    <td className="py-3 text-right font-secondary text-sm text-primary-700">£{item.price.toFixed(2)}</td>
+                    <td className="py-3 text-right font-secondary text-sm text-primary-700">{formatPrice(item.price, currency)}</td>
                     <td className="py-3 text-right font-secondary text-sm font-semibold text-primary-900">
-                      £{(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity, currency)}
                     </td>
                   </tr>
                 ))}
@@ -235,7 +238,7 @@ export default function Receipt() {
               <tfoot>
                 <tr>
                   <td colSpan="3" className="pt-4 text-right font-primary text-lg font-bold text-primary-900">Total</td>
-                  <td className="pt-4 text-right font-primary text-lg font-bold text-primary-900">£{order.total.toFixed(2)}</td>
+                  <td className="pt-4 text-right font-primary text-lg font-bold text-primary-900">{formatPrice(order.total, currency)}</td>
                 </tr>
               </tfoot>
             </table>

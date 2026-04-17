@@ -11,7 +11,10 @@ import { NotificationBanner } from "./components/NotificationBanner";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { CartProvider } from "./context/cart";
-import { AuthProvider } from "./context/auth";
+import { AuthProvider, useAuth } from "./context/auth";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { SettingsProvider } from "./context/settings";
 import "./app.css";
 
 export const links = () => [
@@ -80,17 +83,36 @@ export function Layout({ children }) {
   );
 }
 
+function ProfileGuard({ children }) {
+  const { user, isProfileComplete, isInitializing } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // If user is logged in but profile is incomplete, and they are NOT on /account, redirect them
+    if (!isInitializing && user && !isProfileComplete && location.pathname !== "/account") {
+      navigate("/account");
+    }
+  }, [user, isProfileComplete, isInitializing, location.pathname, navigate]);
+
+  return children;
+}
+
 export default function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <NotificationBanner />
-        <Header />
-        <main className="min-h-[60vh]">
-          <Outlet />
-        </main>
-        <Footer />
-      </CartProvider>
+      <SettingsProvider>
+        <CartProvider>
+          <NotificationBanner />
+          <ProfileGuard>
+            <Header />
+            <main className="min-h-[60vh]">
+              <Outlet />
+            </main>
+            <Footer />
+          </ProfileGuard>
+        </CartProvider>
+      </SettingsProvider>
     </AuthProvider>
   );
 }
