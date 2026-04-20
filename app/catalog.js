@@ -130,6 +130,12 @@ export async function getStats() {
   return res.json();
 }
 
+export async function getLicenses() {
+  const res = await fetch(`${API_URL}/licenses`);
+  if (!res.ok) throw new Error("Failed to fetch licenses");
+  return res.json();
+}
+
 export async function updateSettings(payload) {
   const res = await fetch(`${API_URL}/settings`, {
     method: "PUT",
@@ -137,5 +143,34 @@ export async function updateSettings(payload) {
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("Failed to update settings");
+  return res.json();
+}
+
+export async function createLicense(payload) {
+  const res = await fetch(`${API_URL}/licenses`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to create license");
+  return res.json();
+}
+
+export async function updateLicense(id, payload) {
+  const res = await fetch(`${API_URL}/licenses/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to update license");
+  return res.json();
+}
+
+export async function deleteLicense(id) {
+  const res = await fetch(`${API_URL}/licenses/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Failed to delete license");
   return res.json();
 }

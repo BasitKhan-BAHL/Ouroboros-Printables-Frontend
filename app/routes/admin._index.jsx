@@ -49,6 +49,14 @@ export default function AdminOverview() {
 
   return (
     <div className="space-y-8">
+      <div className="rounded-xl border border-primary-200 bg-white p-8 shadow-sm">
+        <h3 className="font-primary text-xl font-bold text-primary-900 mb-4">Welcome back, Admin</h3>
+        <p className="font-secondary text-primary-600 leading-relaxed">
+          This is your control center. Use the sidebar to manage your store's categories and products.
+          Your current performance metrics are displayed above in real-time.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
           <div key={card.label} className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
@@ -61,14 +69,6 @@ export default function AdminOverview() {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="rounded-xl border border-primary-200 bg-white p-8 shadow-sm">
-        <h3 className="font-primary text-xl font-bold text-primary-900 mb-4">Welcome back, Admin</h3>
-        <p className="font-secondary text-primary-600 leading-relaxed">
-          This is your control center. Use the sidebar to manage your store's categories and products.
-          Your current performance metrics are displayed above in real-time.
-        </p>
       </div>
     </div>
   );

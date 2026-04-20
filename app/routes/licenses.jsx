@@ -4,7 +4,7 @@ import { initializePaddle } from "@paddle/paddle-js";
 import { useCart } from "../context/cart";
 import { useSettings } from "../context/settings";
 import { useAuth } from "../context/auth";
-import { formatPrice } from "../catalog";
+import { getLicenses, formatPrice } from "../catalog";
 
 export function meta() {
   return [
@@ -44,25 +44,26 @@ export default function Licenses() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
   const [paddle, setPaddle] = useState(null);
+  const [licenses, setLicenses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const licenses = [
-    {
-      id: "commercial",
-      title: "Commercial License",
-      desc: "For business and commercial projects",
-      price: formatPrice(29, currency),
-      period: "one-time",
-      features: ["Use on commercial projects", "Client work allowed", "Up to 5 team members", "Priority support", "Extended file formats"],
-    },
-    {
-      id: "enterprise",
-      title: "Enterprise License",
-      desc: "For large teams and organizations",
-      price: formatPrice(99, currency),
-      period: "one-time",
-      features: ["Unlimited commercial use", "Unlimited team members", "White-label rights", "Dedicated support", "Custom file formats", "API access"],
-    },
-  ];
+  useEffect(() => {
+    const fetchLicenses = async () => {
+      try {
+        const data = await getLicenses();
+        setLicenses(data);
+        if (!selectedLicense && data.length > 0) {
+          setSelectedLicense(data[0]._id);
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load licenses. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchLicenses();
+  }, []);
 
   useEffect(() => {
     const initPaddle = async () => {
@@ -188,11 +189,11 @@ export default function Licenses() {
             </div>
           )}
           {licenses.map((license) => {
-            const isSelected = selectedLicense === license.id;
+            const isSelected = selectedLicense === license._id;
             return (
               <div
-                key={license.id}
-                onClick={() => setSelectedLicense(license.id)}
+                key={license._id}
+                onClick={() => setSelectedLicense(license._id)}
                 className={`relative flex cursor-pointer flex-col rounded-xl border p-6 transition ${
                   isSelected ? "border-2 border-primary-900" : "border-primary-200 hover:border-primary-400"
                 } bg-white`}
@@ -203,12 +204,12 @@ export default function Licenses() {
                   </div>
                   <div>
                     <h3 className="font-primary text-lg font-bold text-primary-900">{license.title}</h3>
-                    <p className="font-secondary text-sm text-primary-600">{license.desc}</p>
+                    <p className="font-secondary text-sm text-primary-600">{license.description}</p>
                   </div>
                 </div>
 
                 <div className="mt-6 flex items-baseline gap-1">
-                  <span className="font-primary text-3xl font-bold text-primary-900">{license.price}</span>
+                  <span className="font-primary text-3xl font-bold text-primary-900">{formatPrice(license.price, currency)}</span>
                   {license.period && <span className="font-secondary text-sm text-primary-600">{license.period}</span>}
                 </div>
 

@@ -21,16 +21,23 @@ function formatDate(dateStr) {
 
 function StatusBadge({ status }) {
   const map = {
+    completed: "bg-green-100 text-green-800 border-green-200",
     paid: "bg-green-100 text-green-800 border-green-200",
-    pending: "bg-blue-100 text-blue-800 border-blue-200", // Using a positive blue color for processing
+    processing: "bg-green-100 text-green-800 border-green-200",
+    pending: "bg-blue-100 text-blue-800 border-blue-200",
     failed: "bg-red-100 text-red-800 border-red-200",
     refunded: "bg-gray-100 text-gray-600 border-gray-200",
   };
-  
-  const displayStatus = status === "pending" ? "processing" : status;
-  
+
+  let displayStatus = status;
+  if (status === "processing" || status === "completed" || status === "paid") {
+    displayStatus = "Paid";
+  } else if (status === "pending") {
+    displayStatus = "processing";
+  }
+
   return (
-    <span className={`inline-flex items-center rounded-full border px-3 py-1 font-secondary text-xs font-semibold capitalize ${map[status] || map.pending}`}>
+    <span className={`inline-flex items-center rounded-full border px-3 py-1 font-secondary text-xs font-semibold capitalize ${map[status] || map.processing}`}>
       {displayStatus}
     </span>
   );
@@ -120,41 +127,61 @@ export default function Receipt() {
       {/* ── Print styles ── */}
       <style>{`
         @page {
-          margin: 0mm; /* Removes default browser headers & footers (URLs/Dates) */
+          margin: 0mm;
+          size: auto;
         }
         @media print {
+          /* General resets to force single page */
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            background: #ffffff !important;
+          }
+
+          /* Hide global layout elements */
+          header, footer, nav, aside, .no-print, [role="banner"], [role="contentinfo"], .notification-banner {
+            display: none !important;
+          }
+
+          /* Hide all content by default */
+          body * {
+            visibility: hidden;
+          }
+
+          /* Show only the receipt card */
+          .receipt-card, .receipt-card * {
+            visibility: visible;
+          }
+
+          /* Position receipt card perfectly */
+          .receipt-card {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 10mm !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            page-break-inside: avoid !important;
+            page-break-after: avoid !important;
+            page-break-before: avoid !important;
+          }
+
+          /* Preserve colors */
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
 
-          /* Hide everything in the body by default */
-          body * {
-            visibility: hidden;
-          }
-          
-          /* Make the receipt card and its children visible */
-          .receipt-card, .receipt-card * {
-            visibility: visible;
-          }
-
-          /* Position the receipt at the top left of the page */
-          .receipt-card {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
-            border-radius: 0 !important;
-            page-break-inside: avoid;
-          }
-
-          /* Explicitly hide the 'no-print' elements inside the card if any */
-          .no-print, .no-print * {
-            display: none !important;
-            visibility: hidden !important;
+          /* Hide scrollbars */
+          ::-webkit-scrollbar {
+            display: none;
           }
         }
       `}</style>
@@ -163,7 +190,7 @@ export default function Receipt() {
         {/* ── Top actions (hidden when printing) ── */}
         <div className="no-print mb-6 flex items-center justify-between">
           <Link to="/profile" className="inline-flex items-center gap-1 font-secondary text-sm text-primary-600 hover:text-primary-900 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Order History
           </Link>
           <button
@@ -172,7 +199,7 @@ export default function Receipt() {
             className="inline-flex items-center gap-2 rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-sm font-medium text-primary-900 shadow-sm transition hover:bg-primary-50 hover:shadow-md active:scale-[0.98]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             Download PDF
           </button>

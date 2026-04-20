@@ -53,14 +53,16 @@ function formatDate(dateStr) {
 
 function StatusBadge({ status }) {
   const map = {
-    paid:     "bg-green-100 text-green-800 border-green-200",
-    pending:  "bg-amber-100 text-amber-800 border-amber-200",
-    failed:   "bg-red-100 text-red-800 border-red-200",
+    completed: "bg-green-100 text-green-800 border-green-200",
+    paid: "bg-green-100 text-green-800 border-green-200",
+    processing: "bg-blue-100 text-blue-800 border-blue-200",
+    pending: "bg-blue-100 text-blue-800 border-blue-200",
+    failed: "bg-red-100 text-red-800 border-red-200",
     refunded: "bg-gray-100 text-gray-600 border-gray-200",
   };
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-secondary text-xs font-semibold capitalize ${map[status] || map.pending}`}>
-      {status}
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-secondary text-xs font-semibold capitalize ${map[status] || map.processing}`}>
+      {status === "pending" ? "processing" : status}
     </span>
   );
 }
@@ -237,29 +239,29 @@ export default function Profile() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-16 sm:px-8">
       {/* Header */}
-      <div className="flex items-center gap-6">
-        <div className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-white shadow-sm overflow-hidden ${!user.avatar ? getAvatarColor(user.name) : "bg-primary-200"}`}>
+      <div className="flex items-center gap-4 sm:gap-6">
+        <div className={`flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-full text-white shadow-sm overflow-hidden ${!user.avatar ? getAvatarColor(user.name) : "bg-primary-200"}`}>
           {user.avatar ? (
             <img 
               src={user.avatar} 
               alt={user.name} 
-              className="h-20 w-20 rounded-full object-cover"
+              className="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover"
               onError={(e) => {
                 // If image fails to load, clear it so we show initials
                 e.target.style.display = 'none';
                 e.target.parentNode.classList.add(getAvatarColor(user.name));
-                e.target.parentNode.innerHTML = `<span class="font-primary text-3xl font-bold uppercase">${user.name?.[0] || "?"}</span>`;
+                e.target.parentNode.innerHTML = `<span class="font-primary text-2xl sm:text-3xl font-bold uppercase">${user.name?.[0] || "?"}</span>`;
               }}
             />
           ) : (
-            <span className="font-primary text-3xl font-bold uppercase">
+            <span className="font-primary text-2xl sm:text-3xl font-bold uppercase">
               {user.name?.[0] || "?"}
             </span>
           )}
         </div>
-        <div>
-          <h1 className="font-primary text-3xl font-bold text-primary-900">Welcome, {user.name}</h1>
-          <p className="font-secondary text-primary-600">{user.email}</p>
+        <div className="min-w-0">
+          <h1 className="font-primary text-2xl sm:text-3xl font-bold text-primary-900 truncate">Welcome, {user.name}</h1>
+          <p className="font-secondary text-sm sm:text-base text-primary-600 truncate">{user.email}</p>
           {user.isVerified === false && (
             <span className="mt-1 inline-flex items-center rounded-full bg-amber-100 border border-amber-200 px-2.5 py-0.5 font-secondary text-xs text-amber-700">
               Email not verified

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSettings } from "../context/settings";
 import { updateSettings } from "../catalog";
+import LicenseManager from "../components/LicenseManager";
 
 export default function AdminSettings() {
   const { settings, refreshSettings, updateLocalSettings } = useSettings();
@@ -96,6 +97,8 @@ export default function AdminSettings() {
           </div>
         </form>
       </div>
+      
+      <LicenseManager />
     </div>
   );
 }
