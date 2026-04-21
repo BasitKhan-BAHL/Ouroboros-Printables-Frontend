@@ -85,9 +85,34 @@ export default function Checkout() {
             token: token,
             eventCallback: function (data) {
               if (data.name === "checkout.completed") {
+                const token = window.localStorage.getItem("token");
+                const transactionId =
+                  data?.data?.transaction_id ||
+                  data?.data?.transactionId ||
+                  data?.id ||
+                  null;
+
+                // Fallback confirmation call in case webhook processing lags.
+                if (token && pendingOrder?._id) {
+                  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+                  fetch(`${apiUrl}/orders/confirm`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      orderId: pendingOrder._id,
+                      transactionId,
+                    }),
+                  }).catch(() => {
+                    // Receipt page/order history will reflect updates when webhook lands.
+                  });
+                }
+
                 // Store receipt data in sessionStorage so receipt page can read it instantly
                 const receiptData = pendingOrder
-                  ? { ...pendingOrder, status: "paid" }
+                  ? { ...pendingOrder, paymentStatus: "paid" }
                   : null;
                 if (receiptData) {
                   sessionStorage.setItem("lastOrder", JSON.stringify(receiptData));
@@ -135,6 +160,9 @@ export default function Checkout() {
       });
 
       const data = await res.json();
+      if (res.status === 409) {
+        throw new Error(data.message || "Session mismatch detected. Please sign in again.");
+      }
       if (res.status === 403 && data.requiresLicense) {
         navigate("/licenses?redirect=/checkout");
         return;

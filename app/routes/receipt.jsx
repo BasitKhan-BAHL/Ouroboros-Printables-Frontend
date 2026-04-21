@@ -21,24 +21,15 @@ function formatDate(dateStr) {
 
 function StatusBadge({ status }) {
   const map = {
-    completed: "bg-green-100 text-green-800 border-green-200",
     paid: "bg-green-100 text-green-800 border-green-200",
-    processing: "bg-green-100 text-green-800 border-green-200",
     pending: "bg-blue-100 text-blue-800 border-blue-200",
     failed: "bg-red-100 text-red-800 border-red-200",
     refunded: "bg-gray-100 text-gray-600 border-gray-200",
   };
 
-  let displayStatus = status;
-  if (status === "processing" || status === "completed" || status === "paid") {
-    displayStatus = "Paid";
-  } else if (status === "pending") {
-    displayStatus = "processing";
-  }
-
   return (
-    <span className={`inline-flex items-center rounded-full border px-3 py-1 font-secondary text-xs font-semibold capitalize ${map[status] || map.processing}`}>
-      {displayStatus}
+    <span className={`inline-flex items-center rounded-full border px-3 py-1 font-secondary text-xs font-semibold capitalize ${map[status] || map.pending}`}>
+      {status}
     </span>
   );
 }
@@ -230,7 +221,7 @@ export default function Receipt() {
             </div>
             <div>
               <p className="font-secondary text-xs uppercase tracking-wide text-primary-400">Status</p>
-              <div className="mt-0.5"><StatusBadge status={order.status} /></div>
+              <div className="mt-0.5"><StatusBadge status={order.paymentStatus} /></div>
             </div>
             <div>
               <p className="font-secondary text-xs uppercase tracking-wide text-primary-400">Email</p>

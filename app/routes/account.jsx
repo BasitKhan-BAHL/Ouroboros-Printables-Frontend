@@ -33,10 +33,10 @@ function MailIcon() {
 function GoogleIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20">
-      <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
-      <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
-      <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
-      <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+      <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
+      <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
+      <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+      <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
     </svg>
   );
 }
@@ -162,9 +162,8 @@ function OtpScreen({ email, onSuccess, onBack }) {
               autoFocus={i === 0}
               onChange={(e) => handleDigitChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className={`h-14 w-12 rounded-xl border-2 text-center font-primary text-2xl font-bold text-primary-900 outline-none transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-200 ${
-                error ? "border-red-400 bg-red-50" : d ? "border-primary-400 bg-primary-50" : "border-primary-200 bg-white"
-              }`}
+              className={`h-14 w-12 rounded-xl border-2 text-center font-primary text-2xl font-bold text-primary-900 outline-none transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-200 ${error ? "border-red-400 bg-red-50" : d ? "border-primary-400 bg-primary-50" : "border-primary-200 bg-white"
+                }`}
             />
           ))}
         </div>
@@ -228,7 +227,7 @@ function CompleteProfileScreen({ onComplete }) {
   const { completeProfile, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const [formData, setFormData] = useState({
     businessName: "",
     businessNature: "",
@@ -253,7 +252,7 @@ function CompleteProfileScreen({ onComplete }) {
 
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-16 sm:px-8">
-       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-900 shadow-sm">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-900 shadow-sm">
         <UserIcon />
       </div>
       <h1 className="mt-6 font-primary text-3xl font-bold text-primary-900 text-center">Complete Your Profile</h1>
@@ -450,7 +449,7 @@ export default function Account() {
   // ── Redirect if already logged in and profile is complete ────────────────
   useEffect(() => {
     if (user && isProfileComplete && screen !== "otp") {
-       navigate(redirectParam || "/");
+      navigate(redirectParam || "/");
     }
   }, [user, isProfileComplete, navigate, redirectParam]);
 
@@ -468,7 +467,7 @@ export default function Account() {
 
   // ── Complete Profile Screen ──────────────────────────────────────────────
   if (user && !isProfileComplete) {
-     return <CompleteProfileScreen onComplete={handleAuthSuccess} />;
+    return <CompleteProfileScreen onComplete={handleAuthSuccess} />;
   }
 
   // ── OTP Screen ────────────────────────────────────────────────────────────
@@ -488,7 +487,7 @@ export default function Account() {
 
   // ── Auth forms ────────────────────────────────────────────────────────────
   return (
-    <div className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-16 sm:px-8">
+    <div className="mx-auto flex max-w-2xl flex-col items-center justify-center px-6 py-16 sm:px-8">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-900">
         <UserIcon />
       </div>
@@ -523,22 +522,20 @@ export default function Account() {
         <div className="flex border-b border-primary-200 bg-primary-50">
           <button
             id="tab-signin"
-            className={`flex-1 py-3 text-center font-secondary text-sm font-medium transition ${
-              activeTab === "signin"
-                ? "bg-white text-primary-900 shadow-[inset_0_2px_0_0_#18181b]"
-                : "text-primary-600 hover:text-primary-900"
-            }`}
+            className={`flex-1 py-3 text-center font-secondary text-sm font-medium transition ${activeTab === "signin"
+              ? "bg-white text-primary-900 shadow-[inset_0_2px_0_0_#18181b]"
+              : "text-primary-600 hover:text-primary-900"
+              }`}
             onClick={() => { setActiveTab("signin"); setError(""); }}
           >
             Sign In
           </button>
           <button
             id="tab-create"
-            className={`flex-1 py-3 text-center font-secondary text-sm font-medium transition ${
-              activeTab === "create"
-                ? "bg-white text-primary-900 shadow-[inset_0_2px_0_0_#18181b]"
-                : "text-primary-600 hover:text-primary-900"
-            }`}
+            className={`flex-1 py-3 text-center font-secondary text-sm font-medium transition ${activeTab === "create"
+              ? "bg-white text-primary-900 shadow-[inset_0_2px_0_0_#18181b]"
+              : "text-primary-600 hover:text-primary-900"
+              }`}
             onClick={() => { setActiveTab("create"); setError(""); }}
           >
             Create Account
@@ -590,6 +587,34 @@ export default function Account() {
             </form>
           ) : (
             <form id="form-create" onSubmit={handleCreateAccount} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block font-secondary text-sm font-medium text-primary-900">Email</label>
+                  <input
+                    id="input-create-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-secondary text-sm font-medium text-primary-900">Password</label>
+                  <input
+                    id="input-create-password"
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block font-secondary text-sm font-medium text-primary-900">Buyer Name</label>
@@ -655,7 +680,7 @@ export default function Account() {
               </div>
 
               <div>
-                <label className="block font-secondary text-sm font-medium text-primary-900">Social Link (Insta/Web/FB/TikTok)</label>
+                <label className="block font-secondary text-sm font-medium text-primary-900">Social Link (Instagram / Website / Facebook / TikTok)</label>
                 <input
                   type="text"
                   required
@@ -664,34 +689,6 @@ export default function Account() {
                   placeholder="https://instagram.com/..."
                   className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
                 />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block font-secondary text-sm font-medium text-primary-900">Email</label>
-                  <input
-                    id="input-create-email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-secondary text-sm font-medium text-primary-900">Password</label>
-                  <input
-                    id="input-create-password"
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="mt-1 w-full rounded-lg border border-primary-200 bg-white px-4 py-2 font-secondary text-primary-900 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none"
-                  />
-                </div>
               </div>
 
               <p className="font-secondary text-xs text-primary-500">

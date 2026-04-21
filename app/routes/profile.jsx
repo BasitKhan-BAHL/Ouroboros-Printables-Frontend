@@ -79,6 +79,56 @@ function getAvatarColor(name = "") {
   return colors[Math.abs(hash) % colors.length];
 }
 
+function ProfileAvatar({ user }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const googleFallbackUrl =
+    typeof user.email === "string" && user.email.trim()
+      ? `https://www.google.com/s2/photos?sz=256&email=${encodeURIComponent(
+          user.email.trim()
+        )}`
+      : "";
+  const avatarCandidates = [
+    typeof user.avatar === "string" ? user.avatar.trim() : "",
+    googleFallbackUrl,
+  ].filter(Boolean);
+  const [avatarIndex, setAvatarIndex] = useState(0);
+  const activeAvatar = imageFailed ? "" : avatarCandidates[avatarIndex] || "";
+  const showImage = !!activeAvatar;
+
+  useEffect(() => {
+    setImageFailed(false);
+    setAvatarIndex(0);
+  }, [user.avatar, user.email]);
+
+  return (
+    <div
+      className={`flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-full text-white shadow-sm overflow-hidden ${
+        showImage ? "bg-primary-200" : getAvatarColor(user.name)
+      }`}
+    >
+      {showImage ? (
+        <img
+          src={activeAvatar}
+          alt={user.name}
+          className="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover"
+          onError={() => {
+            const nextIndex = avatarIndex + 1;
+            if (nextIndex < avatarCandidates.length) {
+              setAvatarIndex(nextIndex);
+              return;
+            }
+            setImageFailed(true);
+          }}
+        />
+      ) : (
+        <span className="font-primary text-2xl sm:text-3xl font-bold uppercase">
+          {user.name?.[0] || "?"}
+        </span>
+      )}
+    </div>
+  );
+}
+
 // ─── Order Row ────────────────────────────────────────────────────────────────
 function OrderRow({ order }) {
   const { currency } = useSettings();
@@ -96,7 +146,7 @@ function OrderRow({ order }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="font-secondary text-sm font-semibold text-primary-900">#{shortId}</span>
-            <StatusBadge status={order.status} />
+            <StatusBadge status={order.orderStatus} />
           </div>
           <p className="mt-0.5 font-secondary text-xs text-primary-500">{formatDate(order.createdAt)}</p>
         </div>
@@ -240,25 +290,7 @@ export default function Profile() {
     <div className="mx-auto max-w-4xl px-6 py-16 sm:px-8">
       {/* Header */}
       <div className="flex items-center gap-4 sm:gap-6">
-        <div className={`flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-full text-white shadow-sm overflow-hidden ${!user.avatar ? getAvatarColor(user.name) : "bg-primary-200"}`}>
-          {user.avatar ? (
-            <img 
-              src={user.avatar} 
-              alt={user.name} 
-              className="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover"
-              onError={(e) => {
-                // If image fails to load, clear it so we show initials
-                e.target.style.display = 'none';
-                e.target.parentNode.classList.add(getAvatarColor(user.name));
-                e.target.parentNode.innerHTML = `<span class="font-primary text-2xl sm:text-3xl font-bold uppercase">${user.name?.[0] || "?"}</span>`;
-              }}
-            />
-          ) : (
-            <span className="font-primary text-2xl sm:text-3xl font-bold uppercase">
-              {user.name?.[0] || "?"}
-            </span>
-          )}
-        </div>
+        <ProfileAvatar user={user} />
         <div className="min-w-0">
           <h1 className="font-primary text-2xl sm:text-3xl font-bold text-primary-900 truncate">Welcome, {user.name}</h1>
           <p className="font-secondary text-sm sm:text-base text-primary-600 truncate">{user.email}</p>
