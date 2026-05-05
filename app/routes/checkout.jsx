@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import { initializePaddle } from "@paddle/paddle-js";
+// import { initializePaddle } from "@paddle/paddle-js";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import PhoneInput from "react-phone-number-input";
@@ -68,69 +68,26 @@ export default function Checkout() {
   const [phone, setPhone] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
-  const [paddle, setPaddle] = useState(null);
+  // const [paddle, setPaddle] = useState(null);
+  const [lemonLoaded, setLemonLoaded] = useState(false);
   // Holds the order data after API call — needed to store in session for receipt
   const [pendingOrder, setPendingOrder] = useState(null);
 
   useEffect(() => {
-    const initPaddle = async () => {
-      const token = import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
-      if (token && token !== "your_paddle_client_token_here") {
-        try {
-          const paddleInstance = await initializePaddle({
-            environment:
-              import.meta.env.VITE_PADDLE_ENVIRONMENT === "sandbox"
-                ? "sandbox"
-                : "production",
-            token: token,
-            eventCallback: function (data) {
-              if (data.name === "checkout.completed") {
-                const token = window.localStorage.getItem("token");
-                const transactionId =
-                  data?.data?.transaction_id ||
-                  data?.data?.transactionId ||
-                  data?.id ||
-                  null;
-
-                // Fallback confirmation call in case webhook processing lags.
-                if (token && pendingOrder?._id) {
-                  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-                  fetch(`${apiUrl}/orders/confirm`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                      orderId: pendingOrder._id,
-                      transactionId,
-                    }),
-                  }).catch(() => {
-                    // Receipt page/order history will reflect updates when webhook lands.
-                  });
-                }
-
-                // Store receipt data in sessionStorage so receipt page can read it instantly
-                const receiptData = pendingOrder
-                  ? { ...pendingOrder, paymentStatus: "paid" }
-                  : null;
-                if (receiptData) {
-                  sessionStorage.setItem("lastOrder", JSON.stringify(receiptData));
-                }
-                clear();
-                navigate("/receipt");
-              }
-            },
-          });
-          setPaddle(paddleInstance);
-        } catch (err) {
-          console.error("Paddle initialization error:", err);
+    // Check if LemonSqueezy is already loaded (it's handled globally in root.jsx)
+    if (window.LemonSqueezy) {
+      setLemonLoaded(true);
+    } else {
+      // Fallback: poll for a few seconds if needed, or just wait for the global script
+      const timer = setInterval(() => {
+        if (window.LemonSqueezy) {
+          setLemonLoaded(true);
+          clearInterval(timer);
         }
-      }
-    };
-    initPaddle();
-    // Re-run when pendingOrder becomes available so the callback captures it
-  }, [pendingOrder]);
+      }, 500);
+      return () => clearInterval(timer);
+    }
+  }, []);
 
   const handlePay = async () => {
     setIsProcessing(true);
@@ -169,9 +126,33 @@ export default function Checkout() {
       }
       if (!res.ok) throw new Error(data.message || "Failed to place order");
 
-      // Keep order in state so the Paddle callback can store it for the receipt
+      // Keep order in state
       setPendingOrder(data.order);
 
+      // ── Open LemonSqueezy overlay (Robust Method) ─────────────────────────
+      if (data.checkoutUrl && window.LemonSqueezy) {
+        const checkoutLink = document.createElement("a");
+        checkoutLink.href = data.checkoutUrl;
+        checkoutLink.className = "lemonsqueezy-button";
+        checkoutLink.style.display = "none";
+        document.body.appendChild(checkoutLink);
+        
+        // Re-initialize to ensure the script binds to this new element
+        if (window.createLemonSqueezy) {
+          window.createLemonSqueezy();
+        }
+        
+        checkoutLink.click();
+        document.body.removeChild(checkoutLink);
+      } else {
+        // Fallback
+        const receiptData = { ...data.order, paymentStatus: "paid" };
+        sessionStorage.setItem("lastOrder", JSON.stringify(receiptData));
+        clear();
+        navigate("/receipt");
+      }
+
+      /*
       // ── Open Paddle overlay via Transaction ID ──────────────────────────
       if (data.transactionId && paddle) {
         paddle.Checkout.open({
@@ -191,6 +172,7 @@ export default function Checkout() {
         clear();
         navigate("/receipt");
       }
+      */
     } catch (err) {
       setError(err.message);
     } finally {
@@ -280,8 +262,8 @@ export default function Checkout() {
             )}
 
             <div className="mt-4 rounded-lg border border-secondary-200 bg-secondary-50 p-4 font-secondary text-sm text-secondary-700 text-center">
-              {paddle
-                ? "Secure payment powered by Paddle."
+              {lemonLoaded
+                ? "Secure payment powered by LemonSqueezy."
                 : "Payment will be processed securely. Click Pay to continue."}
             </div>
 
@@ -356,7 +338,7 @@ export default function Checkout() {
             </div>
             <p className="flex items-center gap-2 font-secondary text-xs text-primary-500">
               <LockIcon />
-              Secure checkout powered by Paddle
+              Secure checkout powered by LemonSqueezy
             </p>
           </div>
         </div>

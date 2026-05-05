@@ -99,6 +99,45 @@ function ProfileGuard({ children }) {
 }
 
 export default function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // ── Load LemonSqueezy Globally ──
+    const script = document.createElement("script");
+    script.src = "https://app.lemonsqueezy.com/js/lemon.js";
+    script.async = true;
+    script.onload = () => {
+      if (window.createLemonSqueezy) {
+        window.createLemonSqueezy();
+      }
+      if (window.LemonSqueezy) {
+        window.LemonSqueezy.Setup({
+          eventHandler: (event) => {
+            if (event.event === "Checkout.Success") {
+              // We could trigger a refresh or redirect here, 
+              // but the backend redirect usually handles it.
+              console.log("Payment successful!");
+            }
+          }
+        });
+      }
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
+  // Re-initialize LemonSqueezy on route changes to ensure overlay links/logic are bound
+  useEffect(() => {
+    if (window.createLemonSqueezy) {
+      window.createLemonSqueezy();
+    }
+  }, [location.pathname]);
+
   return (
     <AuthProvider>
       <SettingsProvider>

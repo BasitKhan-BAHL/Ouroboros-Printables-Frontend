@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { initializePaddle } from "@paddle/paddle-js";
+// import { initializePaddle } from "@paddle/paddle-js";
 import { useCart } from "../context/cart";
 import { useSettings } from "../context/settings";
 import { useAuth } from "../context/auth";
@@ -43,7 +43,8 @@ export default function Licenses() {
   const productIdParam = searchParams.get("productId");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
-  const [paddle, setPaddle] = useState(null);
+  // const [paddle, setPaddle] = useState(null);
+  const [lemonLoaded, setLemonLoaded] = useState(false);
   const [licenses, setLicenses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -66,63 +67,19 @@ export default function Licenses() {
   }, []);
 
   useEffect(() => {
-    const initPaddle = async () => {
-      const token = import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
-      if (!token || token === "your_paddle_client_token_here") return;
-      try {
-        const paddleInstance = await initializePaddle({
-          environment:
-            import.meta.env.VITE_PADDLE_ENVIRONMENT === "sandbox"
-              ? "sandbox"
-              : "production",
-          token,
-          eventCallback: async (data) => {
-            if (data.name === "checkout.completed") {
-              const token = window.localStorage.getItem("token");
-              const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-              const transactionId =
-                data?.data?.transaction_id ||
-                data?.data?.transactionId ||
-                data?.id ||
-                null;
-
-              // Optimistic update first for responsive UX.
-              applyLocalLicense(selectedLicense);
-              try {
-                if (token && transactionId) {
-                  const confirmRes = await fetch(`${apiUrl}/orders/license/confirm`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ transactionId, licenseType: selectedLicense }),
-                  });
-                  if (!confirmRes.ok) {
-                    const confirmData = await confirmRes.json();
-                    throw new Error(confirmData.message || "Failed to confirm license purchase");
-                  }
-                }
-                await refreshUser();
-              } catch {
-                // Keep optimistic state if DB sync is delayed.
-              }
-              if (actionParam === "add_to_cart" && productIdParam) {
-                addItem(productIdParam);
-                navigate("/cart");
-                return;
-              }
-              navigate(redirectParams || "/profile");
-            }
-          },
-        });
-        setPaddle(paddleInstance);
-      } catch (err) {
-        console.error("Paddle initialization error:", err);
-      }
-    };
-    initPaddle();
-  }, [actionParam, addItem, applyLocalLicense, navigate, productIdParam, redirectParams, refreshUser, selectedLicense]);
+    // Check if LemonSqueezy is already loaded (it's handled globally in root.jsx)
+    if (window.LemonSqueezy) {
+      setLemonLoaded(true);
+    } else {
+      const timer = setInterval(() => {
+        if (window.LemonSqueezy) {
+          setLemonLoaded(true);
+          clearInterval(timer);
+        }
+      }, 500);
+      return () => clearInterval(timer);
+    }
+  }, []);
 
   const handleContinue = async () => {
     try {
@@ -142,6 +99,32 @@ export default function Licenses() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to start license checkout");
 
+      if (!window.LemonSqueezy || !data.checkoutUrl) {
+        throw new Error("LemonSqueezy is not ready. Please try again in a moment.");
+      }
+
+      // Optimistically update UI
+      applyLocalLicense(selectedLicense);
+      
+      // ── Open LemonSqueezy overlay (Robust Method) ─────────────────────────
+      if (window.LemonSqueezy && data.checkoutUrl) {
+        const checkoutLink = document.createElement("a");
+        checkoutLink.href = data.checkoutUrl;
+        checkoutLink.className = "lemonsqueezy-button";
+        checkoutLink.style.display = "none";
+        document.body.appendChild(checkoutLink);
+        
+        if (window.createLemonSqueezy) {
+          window.createLemonSqueezy();
+        }
+        
+        checkoutLink.click();
+        document.body.removeChild(checkoutLink);
+      } else if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      }
+
+      /*
       if (!paddle || !data.transactionId) {
         throw new Error("Paddle is not ready. Please try again in a moment.");
       }
@@ -156,6 +139,7 @@ export default function Licenses() {
           showAddTaxId: false,
         },
       });
+      */
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to start license checkout.");
