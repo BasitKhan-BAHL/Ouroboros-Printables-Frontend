@@ -308,7 +308,7 @@ export default function Profile() {
           <h2 className="font-primary text-xl font-bold text-primary-900">Active Subscription</h2>
           <div className="mt-4">
             <p className="font-secondary text-sm text-primary-500">Current License</p>
-            <p className="font-primary font-medium text-primary-900 capitalize">{user.license}</p>
+            <p className="font-primary font-medium text-primary-900 capitalize">{user.license === "free" ? "Free" : `${user.license} License`}</p>
             <div className="mt-6">
               <Link
                 to="/licenses?redirect=/profile"

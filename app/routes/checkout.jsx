@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-// import { initializePaddle } from "@paddle/paddle-js";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import PhoneInput from "react-phone-number-input";
@@ -68,7 +67,6 @@ export default function Checkout() {
   const [phone, setPhone] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
-  // const [paddle, setPaddle] = useState(null);
   const [lemonLoaded, setLemonLoaded] = useState(false);
   // Holds the order data after API call — needed to store in session for receipt
   const [pendingOrder, setPendingOrder] = useState(null);
@@ -152,27 +150,6 @@ export default function Checkout() {
         navigate("/receipt");
       }
 
-      /*
-      // ── Open Paddle overlay via Transaction ID ──────────────────────────
-      if (data.transactionId && paddle) {
-        paddle.Checkout.open({
-          transactionId: data.transactionId,
-          settings: {
-            displayMode: "overlay",
-            theme: "light",
-            locale: "en",
-            showAddDiscounts: false,
-            showAddTaxId: false,
-          },
-        });
-      } else {
-        // Fallback when Paddle is not configured — go to receipt directly
-        const receiptData = { ...data.order, status: "paid" };
-        sessionStorage.setItem("lastOrder", JSON.stringify(receiptData));
-        clear();
-        navigate("/receipt");
-      }
-      */
     } catch (err) {
       setError(err.message);
     } finally {

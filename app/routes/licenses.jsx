@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-// import { initializePaddle } from "@paddle/paddle-js";
 import { useCart } from "../context/cart";
 import { useSettings } from "../context/settings";
 import { useAuth } from "../context/auth";
@@ -43,7 +42,6 @@ export default function Licenses() {
   const productIdParam = searchParams.get("productId");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
-  // const [paddle, setPaddle] = useState(null);
   const [lemonLoaded, setLemonLoaded] = useState(false);
   const [licenses, setLicenses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,6 +79,20 @@ export default function Licenses() {
     }
   }, []);
 
+  useEffect(() => {
+    const handlePaymentSuccess = () => {
+      // Payment was successful, now we can confidently update the UI.
+      // Wait a moment for webhooks to process on the backend, then refresh user.
+      applyLocalLicense(selectedLicense);
+      setTimeout(() => {
+        refreshUser();
+      }, 2000);
+    };
+
+    window.addEventListener("lemon-squeezy-success", handlePaymentSuccess);
+    return () => window.removeEventListener("lemon-squeezy-success", handlePaymentSuccess);
+  }, [selectedLicense, applyLocalLicense, refreshUser]);
+
   const handleContinue = async () => {
     try {
       setIsProcessing(true);
@@ -103,8 +115,8 @@ export default function Licenses() {
         throw new Error("LemonSqueezy is not ready. Please try again in a moment.");
       }
 
-      // Optimistically update UI
-      applyLocalLicense(selectedLicense);
+      // We should NOT optimistically update the UI here. 
+      // The UI should only update when the payment is actually successful.
       
       // ── Open LemonSqueezy overlay (Robust Method) ─────────────────────────
       if (window.LemonSqueezy && data.checkoutUrl) {
@@ -124,22 +136,6 @@ export default function Licenses() {
         window.location.href = data.checkoutUrl;
       }
 
-      /*
-      if (!paddle || !data.transactionId) {
-        throw new Error("Paddle is not ready. Please try again in a moment.");
-      }
-
-      paddle.Checkout.open({
-        transactionId: data.transactionId,
-        settings: {
-          displayMode: "overlay",
-          theme: "light",
-          locale: "en",
-          showAddDiscounts: false,
-          showAddTaxId: false,
-        },
-      });
-      */
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to start license checkout.");
@@ -156,7 +152,7 @@ export default function Licenses() {
       </div>
       {user?.license && (
         <p className="mt-4 text-center font-secondary text-sm text-primary-700">
-          Current license: <span className="font-semibold capitalize">{user.license}</span>
+          Current license: <span className="font-semibold capitalize">{user.license === "free" ? "Free" : `${user.license} License`}</span>
         </p>
       )}
 

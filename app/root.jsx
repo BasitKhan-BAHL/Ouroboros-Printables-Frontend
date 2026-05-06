@@ -114,9 +114,8 @@ export default function App() {
         window.LemonSqueezy.Setup({
           eventHandler: (event) => {
             if (event.event === "Checkout.Success") {
-              // We could trigger a refresh or redirect here, 
-              // but the backend redirect usually handles it.
               console.log("Payment successful!");
+              window.dispatchEvent(new CustomEvent("lemon-squeezy-success", { detail: event.data }));
             }
           }
         });

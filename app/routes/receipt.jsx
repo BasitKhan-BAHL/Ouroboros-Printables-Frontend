@@ -262,15 +262,6 @@ export default function Receipt() {
             </table>
           </div>
 
-          {/* Paddle transaction ref */}
-          {order.paddleTransactionId && (
-            <div className="border-t border-primary-100 bg-primary-50 px-8 py-4">
-              <p className="font-secondary text-xs text-primary-400">
-                Payment Reference: <span className="font-mono text-primary-600">{order.paddleTransactionId}</span>
-              </p>
-            </div>
-          )}
-
           {/* Footer */}
           <div className="border-t border-primary-100 px-8 py-5 text-center">
             <p className="font-secondary text-sm text-primary-600">
