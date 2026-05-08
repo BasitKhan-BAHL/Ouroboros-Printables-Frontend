@@ -106,12 +106,12 @@ export default function Product() {
         <div className="grid gap-12 lg:grid-cols-2">
           <div className="overflow-hidden rounded-xl bg-secondary-100 p-12 shadow-sm">
             <div className="aspect-square overflow-hidden rounded-lg bg-primary-100">
-              <img
-                src={category?.image || '/db-images/1.jpeg'}
-                alt={product.title}
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
+                <img
+                  src={product?.image || category?.image || '/db-images/1.jpeg'}
+                  alt={product.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
             </div>
           </div>
           <div>

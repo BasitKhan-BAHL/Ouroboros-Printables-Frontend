@@ -19,6 +19,15 @@ function Modal({ isOpen, onClose, title, children }) {
   );
 }
 
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -218,15 +227,37 @@ export default function AdminCategories() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-primary-900">Image URL / Path</label>
-            <input
-              type="text"
-              required
-              placeholder="/db-images/example.jpeg"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="w-full rounded-lg border border-primary-200 px-3 py-2 text-primary-900 focus:outline-none focus:border-primary-400"
-            />
+            <label className="mb-1 block text-sm font-medium text-primary-900">Category Image</label>
+            <div className="flex flex-col gap-3">
+              {image && (
+                <div className="relative h-32 w-full overflow-hidden rounded-lg border border-primary-200">
+                  <img src={image} alt="Preview" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setImage("")}
+                    className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    try {
+                      const base64 = await fileToBase64(file);
+                      setImage(base64);
+                    } catch (err) {
+                      console.error("Failed to convert file", err);
+                    }
+                  }
+                }}
+                className="w-full text-sm text-primary-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-900 hover:file:bg-primary-200"
+              />
+            </div>
           </div>
           <button
             type="submit"

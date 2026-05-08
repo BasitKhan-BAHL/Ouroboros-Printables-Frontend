@@ -134,7 +134,7 @@ export function CartProvider({ children }) {
         const product = productsCache[productId];
         if (!product) return null;
         const lineTotal = product.price * quantity;
-        const categoryImage = categoriesCache[product.categoryId] || "/db-images/1.jpeg";
+        const categoryImage = product.image || categoriesCache[product.categoryId] || "/db-images/1.jpeg";
         return {
           productId,
           quantity,

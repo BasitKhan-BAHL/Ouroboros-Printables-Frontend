@@ -20,6 +20,15 @@ function Modal({ isOpen, onClose, title, children }) {
   );
 }
 
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 export default function AdminProducts() {
   const { currency } = useSettings();
   const [products, setProducts] = useState([]);
@@ -35,6 +44,9 @@ export default function AdminProducts() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [image, setImage] = useState("");
+  const [fileData, setFileData] = useState("");
+  const [fileName, setFileName] = useState("");
   
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,6 +96,9 @@ export default function AdminProducts() {
     setDescription("");
     setPrice("");
     setCategoryId(categories[0]?._id || categories[0]?.slug || "");
+    setImage("");
+    setFileData("");
+    setFileName("");
     setFormError("");
     setIsModalOpen(true);
   };
@@ -94,6 +109,9 @@ export default function AdminProducts() {
     setDescription(prod.description);
     setPrice(prod.price);
     setCategoryId(prod.categoryId);
+    setImage(prod.image || "");
+    setFileData(prod.fileData || "");
+    setFileName(prod.fileName || "");
     setFormError("");
     setIsModalOpen(true);
   };
@@ -107,7 +125,10 @@ export default function AdminProducts() {
         title,
         description,
         price: parseFloat(price),
-        categoryId
+        categoryId,
+        image,
+        fileData,
+        fileName
       };
 
       if (editingProduct) {
@@ -200,8 +221,19 @@ export default function AdminProducts() {
               return (
                 <tr key={prodId} className="hover:bg-primary-50/50">
                   <td className="px-6 py-4">
-                    <p className="font-medium">{prod.title}</p>
-                    <p className="text-primary-500 truncate max-w-[200px]">{prod.description}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-primary-100 border border-primary-200">
+                        {prod.image ? (
+                          <img src={prod.image} alt={prod.title} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-[10px] text-primary-400">No Image</div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{prod.title}</p>
+                        <p className="text-primary-500 truncate max-w-[200px]">{prod.description}</p>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-primary-600">
                     <span className="inline-block rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-700">
@@ -275,6 +307,78 @@ export default function AdminProducts() {
                   <option key={c._id || c.slug} value={c._id || c.slug}>{c.title}</option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-primary-900">Digital Product File (PDF, etc.)</label>
+            <div className="flex flex-col gap-2">
+              {fileName && (
+                <div className="flex items-center justify-between rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-700 border border-primary-200">
+                  <span className="truncate max-w-[250px]">{fileName}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFileData("");
+                      setFileName("");
+                    }}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              <input
+                type="file"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    try {
+                      const base64 = await fileToBase64(file);
+                      setFileData(base64);
+                      setFileName(file.name);
+                    } catch (err) {
+                      console.error("Failed to convert file", err);
+                    }
+                  }
+                }}
+                className="w-full text-sm text-primary-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-900 hover:file:bg-primary-200"
+              />
+              <p className="text-[10px] text-primary-400 italic">This file will be available for download to customers after purchase.</p>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-primary-900">Product Preview Image</label>
+            <div className="flex flex-col gap-3">
+              {image && (
+                <div className="relative h-32 w-full overflow-hidden rounded-lg border border-primary-200">
+                  <img src={image} alt="Preview" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setImage("")}
+                    className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    try {
+                      const base64 = await fileToBase64(file);
+                      setImage(base64);
+                    } catch (err) {
+                      console.error("Failed to convert file", err);
+                    }
+                  }
+                }}
+                className="w-full text-sm text-primary-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-900 hover:file:bg-primary-200"
+              />
             </div>
           </div>
           <button

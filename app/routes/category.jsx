@@ -74,7 +74,7 @@ export default function Category() {
             >
               <div className="aspect-square overflow-hidden rounded-lg bg-primary-100">
                 <img
-                  src={category.image}
+                  src={product.image || category.image}
                   alt={product.title}
                   loading="lazy"
                   className="h-full w-full object-cover"

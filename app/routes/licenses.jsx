@@ -80,7 +80,13 @@ export default function Licenses() {
             setSuccess(false);
             setIsActivating(false);
             clearInterval(pollInterval);
-            // Optionally redirect to profile or show success toast
+            
+            // Redirect if we have a redirect param
+            if (redirectParams) {
+              navigate(redirectParams);
+            } else {
+              navigate("/profile");
+            }
           }
         } catch (err) {
           console.error("Polling error:", err);
@@ -157,7 +163,11 @@ export default function Licenses() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ licenseType: selectedLicense, customerEmail: user?.email }),
+        body: JSON.stringify({ 
+          licenseType: selectedLicense, 
+          customerEmail: user?.email,
+          redirect: redirectParams 
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to start license checkout");
