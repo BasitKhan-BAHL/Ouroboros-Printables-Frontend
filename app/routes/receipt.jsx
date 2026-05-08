@@ -76,8 +76,29 @@ export default function Receipt() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Order not found");
         setOrder(data.order);
+
+        // 3️⃣  If pending, poll for updates
+        if (data.order.paymentStatus === "pending") {
+          const pollInterval = setInterval(async () => {
+            try {
+              const res = await fetch(`${API_BASE}/orders/${orderId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              const pollData = await res.json();
+              if (res.ok && pollData.order.paymentStatus !== "pending") {
+                setOrder(pollData.order);
+                clearInterval(pollInterval);
+              }
+            } catch (err) {
+              console.error("Polling error:", err);
+            }
+          }, 3000);
+
+          // Stop polling after 30 seconds
+          setTimeout(() => clearInterval(pollInterval), 30000);
+          return () => clearInterval(pollInterval);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -220,8 +241,25 @@ export default function Receipt() {
               <p className="mt-0.5 font-secondary font-semibold text-primary-900">{formatDate(order.createdAt)}</p>
             </div>
             <div>
-              <p className="font-secondary text-xs uppercase tracking-wide text-primary-400">Status</p>
-              <div className="mt-0.5"><StatusBadge status={order.paymentStatus} /></div>
+              <p className="mt-0.5 uppercase tracking-wide text-primary-400 font-secondary text-xs">Status</p>
+              <div className="mt-0.5 flex flex-col items-start gap-2">
+                <StatusBadge status={order.paymentStatus} />
+                {import.meta.env.DEV && order.paymentStatus === "pending" && (
+                  <button
+                    onClick={async () => {
+                      const token = window.localStorage.getItem("token");
+                      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+                      // This is a bit of a hack for dev, but we can't easily update order status without a specialized route
+                      // So we'll just mock the update locally for the UI testing if the backend doesn't have a dev route
+                      // Actually, let's just show how it would look.
+                      setOrder(prev => ({ ...prev, paymentStatus: "paid" }));
+                    }}
+                    className="text-[10px] font-bold text-amber-600 underline"
+                  >
+                    DEV: Mock Paid
+                  </button>
+                )}
+              </div>
             </div>
             <div>
               <p className="font-secondary text-xs uppercase tracking-wide text-primary-400">Email</p>

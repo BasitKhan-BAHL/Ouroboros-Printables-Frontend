@@ -45,6 +45,8 @@ export default function Licenses() {
   const [lemonLoaded, setLemonLoaded] = useState(false);
   const [licenses, setLicenses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [success, setSuccess] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
 
   useEffect(() => {
     const fetchLicenses = async () => {
@@ -63,6 +65,40 @@ export default function Licenses() {
     };
     fetchLicenses();
   }, []);
+
+  useEffect(() => {
+    // Check for success query param
+    if (searchParams.get("success") === "true") {
+      setSuccess(true);
+      setIsActivating(true);
+      
+      // Poll for user update
+      const pollInterval = setInterval(async () => {
+        try {
+          const updatedUser = await refreshUser();
+          if (updatedUser?.license && updatedUser.license !== "free") {
+            setSuccess(false);
+            setIsActivating(false);
+            clearInterval(pollInterval);
+            // Optionally redirect to profile or show success toast
+          }
+        } catch (err) {
+          console.error("Polling error:", err);
+        }
+      }, 3000);
+
+      // Stop polling after 30 seconds to avoid infinite loops
+      const timeout = setTimeout(() => {
+        clearInterval(pollInterval);
+        setIsActivating(false);
+      }, 30000);
+
+      return () => {
+        clearInterval(pollInterval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [searchParams, refreshUser]);
 
   useEffect(() => {
     // Check if LemonSqueezy is already loaded (it's handled globally in root.jsx)
@@ -84,14 +120,29 @@ export default function Licenses() {
       // Payment was successful, now we can confidently update the UI.
       // Wait a moment for webhooks to process on the backend, then refresh user.
       applyLocalLicense(selectedLicense);
+      setSuccess(true);
+      setIsActivating(true);
+      
       setTimeout(() => {
-        refreshUser();
+        refreshUser().finally(() => {
+          setIsActivating(false);
+          // If we are in the overlay, it might still be open. 
+          // Redirecting or refreshing state will happen.
+        });
       }, 2000);
     };
 
     window.addEventListener("lemon-squeezy-success", handlePaymentSuccess);
     return () => window.removeEventListener("lemon-squeezy-success", handlePaymentSuccess);
   }, [selectedLicense, applyLocalLicense, refreshUser]);
+
+  const handleSimulateSuccess = async () => {
+    try {
+      setIsProcessing(true);
+      const { updateLicense } = useAuth(); // We need to get this from context inside the component
+      // Actually useAuth is already available in the component scope
+    } catch (err) {}
+  };
 
   const handleContinue = async () => {
     try {
@@ -163,58 +214,123 @@ export default function Licenses() {
         </div>
         
         <div className="mt-6 grid gap-6 md:grid-cols-3">
-          {error && (
-            <div className="md:col-span-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-secondary text-sm text-red-700">
-              {error}
-            </div>
-          )}
-          {licenses.map((license) => {
-            const isSelected = selectedLicense === license._id;
-            return (
-              <div
-                key={license._id}
-                onClick={() => setSelectedLicense(license._id)}
-                className={`relative flex cursor-pointer flex-col rounded-xl border p-6 transition ${
-                  isSelected ? "border-2 border-primary-900" : "border-primary-200 hover:border-primary-400"
-                } bg-white`}
-              >
+          {isLoading ? (
+            // Skeleton Loader
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex flex-col rounded-xl border border-primary-100 p-6 bg-white shadow-sm">
                 <div className="flex gap-3">
-                  <div className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${isSelected ? "border-primary-900" : "border-primary-400"}`}>
-                    {isSelected && <div className="h-2 w-2 rounded-full bg-primary-900" />}
-                  </div>
-                  <div>
-                    <h3 className="font-primary text-lg font-bold text-primary-900">{license.title}</h3>
-                    <p className="font-secondary text-sm text-primary-600">{license.description}</p>
+                  <div className="mt-1 h-4 w-4 shrink-0 rounded-full bg-slate-200 animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-5 w-3/4 rounded bg-slate-200 animate-pulse" />
+                    <div className="h-4 w-full rounded bg-slate-200 animate-pulse" />
                   </div>
                 </div>
-
-                <div className="mt-6 flex items-baseline gap-1">
-                  <span className="font-primary text-3xl font-bold text-primary-900">{formatPrice(license.price, currency)}</span>
-                  {license.period && <span className="font-secondary text-sm text-primary-600">{license.period}</span>}
-                </div>
-
-                <ul className="mb-8 mt-6 flex-1 space-y-3 font-secondary text-sm text-primary-700">
-                  {license.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <CheckIcon />
-                      {feature}
-                    </li>
+                <div className="mt-6 h-8 w-1/3 rounded bg-slate-200 animate-pulse" />
+                <div className="mt-6 space-y-3 flex-1">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <div key={j} className="flex items-center gap-2">
+                      <div className="h-4 w-4 rounded bg-slate-200 animate-pulse" />
+                      <div className="h-3 w-full rounded bg-slate-200 animate-pulse" />
+                    </div>
                   ))}
-                </ul>
-
-                <button
-                  type="button"
-                  className={`mt-auto w-full rounded-lg py-2.5 font-secondary text-sm font-medium transition ${
-                    isSelected
-                      ? "bg-primary-900 text-white"
-                      : "border border-primary-200 bg-white text-primary-900 hover:bg-primary-50"
-                  }`}
-                >
-                  {isSelected ? "Selected" : "Select"}
-                </button>
+                </div>
+                <div className="mt-8 h-10 w-full rounded-lg bg-slate-200 animate-pulse" />
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <>
+              {error && (
+                <div className="md:col-span-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-secondary text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+              {isActivating && (
+                <div className="md:col-span-3 rounded-lg border border-primary-200 bg-primary-50 px-4 py-6 font-secondary text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary-200 border-t-primary-900" />
+                    <p className="text-primary-900 font-bold">Activating your license...</p>
+                    <p className="text-sm text-primary-600">Please wait while we confirm your payment. This usually takes a few seconds.</p>
+                    
+                    {import.meta.env.DEV && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const { useAuth } = await import("../context/auth");
+                            // We already have access to the auth context via the useAuth hook at the top
+                          } catch (e) {}
+                          
+                          // Manual bypass for local testing
+                          const token = window.localStorage.getItem("token");
+                          const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+                          await fetch(`${apiUrl}/users/me`, {
+                            method: "PATCH",
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization: `Bearer ${token}`,
+                            },
+                            body: JSON.stringify({ license: selectedLicense }),
+                          });
+                          await refreshUser();
+                          setIsActivating(false);
+                          setSuccess(false);
+                        }}
+                        className="mt-4 rounded bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-200"
+                      >
+                        DEBUG: Simulate Webhook Success
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {!isActivating && licenses.map((license) => {
+                const isSelected = selectedLicense === license._id;
+                return (
+                  <div
+                    key={license._id}
+                    onClick={() => setSelectedLicense(license._id)}
+                    className={`relative flex cursor-pointer flex-col rounded-xl border p-6 transition ${
+                      isSelected ? "border-2 border-primary-900" : "border-primary-200 hover:border-primary-400"
+                    } bg-white`}
+                  >
+                    <div className="flex gap-3">
+                      <div className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${isSelected ? "border-primary-900" : "border-primary-400"}`}>
+                        {isSelected && <div className="h-2 w-2 rounded-full bg-primary-900" />}
+                      </div>
+                      <div>
+                        <h3 className="font-primary text-lg font-bold text-primary-900">{license.title}</h3>
+                        <p className="font-secondary text-sm text-primary-600">{license.description}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 flex items-baseline gap-1">
+                      <span className="font-primary text-3xl font-bold text-primary-900">{formatPrice(license.price, currency)}</span>
+                      {license.period && <span className="font-secondary text-sm text-primary-600">{license.period}</span>}
+                    </div>
+
+                    <ul className="mb-8 mt-6 flex-1 space-y-3 font-secondary text-sm text-primary-700">
+                      {license.features.map((feature, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <CheckIcon />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <button
+                      type="button"
+                      className={`mt-auto w-full rounded-lg py-2.5 font-secondary text-sm font-medium transition ${
+                        isSelected
+                          ? "bg-primary-900 text-white"
+                          : "border border-primary-200 bg-white text-primary-900 hover:bg-primary-50"
+                      }`}
+                    >
+                      {isSelected ? "Selected" : "Select"}
+                    </button>
+                  </div>
+                );
+              })}
+            </>
+          )}
         </div>
       </div>
 

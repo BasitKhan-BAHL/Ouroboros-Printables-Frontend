@@ -72,6 +72,22 @@ export default function Checkout() {
   const [pendingOrder, setPendingOrder] = useState(null);
 
   useEffect(() => {
+    const handleSuccess = (event) => {
+      // Clear cart and navigate to receipt
+      clear();
+      if (pendingOrder?._id) {
+        navigate(`/receipt?orderId=${pendingOrder._id}`);
+      } else {
+        // Fallback if pendingOrder isn't set yet (though it should be)
+        navigate("/receipt");
+      }
+    };
+
+    window.addEventListener("lemon-squeezy-success", handleSuccess);
+    return () => window.removeEventListener("lemon-squeezy-success", handleSuccess);
+  }, [pendingOrder, clear, navigate]);
+
+  useEffect(() => {
     // Check if LemonSqueezy is already loaded (it's handled globally in root.jsx)
     if (window.LemonSqueezy) {
       setLemonLoaded(true);
