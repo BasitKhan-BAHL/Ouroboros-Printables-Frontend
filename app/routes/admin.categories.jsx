@@ -92,6 +92,12 @@ export default function AdminCategories() {
     setFormError("");
     setIsSubmitting(true);
     try {
+      if (!image) {
+        setFormError("Category image is mandatory. Please upload an image.");
+        setIsSubmitting(false);
+        return;
+      }
+
       if (editingCategory) {
         await updateCategory(editingCategory._id || editingCategory.slug, {
           title, description, image
@@ -227,18 +233,35 @@ export default function AdminCategories() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-primary-900">Category Image</label>
-            <div className="flex flex-col gap-3">
-              {image && (
-                <div className="relative h-32 w-full overflow-hidden rounded-lg border border-primary-200">
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-primary-500">Category Image</label>
+            <div className="group relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-primary-200 bg-slate-50 transition-all hover:border-primary-400">
+              {image ? (
+                <>
                   <img src={image} alt="Preview" className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setImage("")}
-                    className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
-                  >
-                    ✕
-                  </button>
+                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setImage("");
+                      }}
+                      className="rounded-full bg-red-500 p-2 text-white hover:bg-red-600 shadow-lg transition-transform hover:scale-110"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center p-6 text-center">
+                  <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-primary-900">Click to upload category image</p>
+                  <p className="text-xs text-primary-400">JPG, PNG (4:3 recommended)</p>
                 </div>
               )}
               <input
@@ -255,7 +278,7 @@ export default function AdminCategories() {
                     }
                   }
                 }}
-                className="w-full text-sm text-primary-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-900 hover:file:bg-primary-200"
+                className="absolute inset-0 z-10 cursor-pointer opacity-0"
               />
             </div>
           </div>

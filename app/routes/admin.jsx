@@ -53,7 +53,7 @@ export default function AdminLayout() {
   // Render Login Screen if not authenticated as Admin
   if (!user || !user.isAdmin) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-primary-50 px-6 py-12">
+      <div className="flex min-h-screen flex-col items-center justify-start bg-primary-50 px-6 pt-24 pb-12">
         <div className="w-full max-w-md">
           <div className="mb-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-900 shadow-xl">
@@ -121,7 +121,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-primary-50">
-      <div className="mx-auto max-w-[90rem] px-6 py-12 sm:px-8">
+      <div className="mx-auto max-w-[90rem] px-6 pt-8 pb-12 sm:px-8">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-primary-200 pb-8">
           <div>
             <h1 className="font-primary text-4xl font-bold tracking-tight text-primary-900">Admin Dashboard</h1>

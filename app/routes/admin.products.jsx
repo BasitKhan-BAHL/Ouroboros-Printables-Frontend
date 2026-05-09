@@ -34,11 +34,11 @@ export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  
+
   // Form State
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -47,7 +47,7 @@ export default function AdminProducts() {
   const [image, setImage] = useState("");
   const [fileData, setFileData] = useState("");
   const [fileName, setFileName] = useState("");
-  
+
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -67,9 +67,9 @@ export default function AdminProducts() {
   const fetchProductsData = async () => {
     setLoading(true);
     try {
-      const data = await getProducts({ 
-        categoryId: activeCategory, 
-        search: searchTerm 
+      const data = await getProducts({
+        categoryId: activeCategory,
+        search: searchTerm
       });
       setProducts(data);
     } catch (err) {
@@ -163,7 +163,7 @@ export default function AdminProducts() {
     <div>
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h2 className="font-primary text-xl font-bold text-primary-900">Products</h2>
-        
+
         <div className="flex flex-1 flex-col gap-3 md:max-w-xl md:flex-row md:items-center">
           <div className="relative flex-1">
             <input
@@ -179,7 +179,7 @@ export default function AdminProducts() {
               </svg>
             </span>
           </div>
-          
+
           <select
             value={activeCategory}
             onChange={(e) => setActiveCategory(e.target.value)}
@@ -206,62 +206,66 @@ export default function AdminProducts() {
         <div className="text-primary-600 font-secondary">Loading products...</div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-primary-200 bg-white shadow-sm">
-        <table className="w-full text-left font-secondary text-sm text-primary-900">
-          <thead className="bg-primary-50">
-            <tr>
-              <th className="px-6 py-4 font-semibold text-primary-900">Product</th>
-              <th className="px-6 py-4 font-semibold text-primary-900">Category</th>
-              <th className="px-6 py-4 font-semibold text-primary-900">Price ({currency})</th>
-              <th className="px-6 py-4 text-right font-semibold text-primary-900">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-primary-100">
-            {products.map((prod) => {
-              const prodId = prod._id || prod.id;
-              return (
-                <tr key={prodId} className="hover:bg-primary-50/50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-primary-100 border border-primary-200">
-                        {prod.image ? (
-                          <img src={prod.image} alt={prod.title} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] text-primary-400">No Image</div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium">{prod.title}</p>
-                        <p className="text-primary-500 truncate max-w-[200px]">{prod.description}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-primary-600">
-                    <span className="inline-block rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-700">
-                      {getCategoryName(prod.categoryId)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-medium">{formatPrice(prod.price, currency)}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button onClick={() => openEditModal(prod)} className="text-secondary-600 hover:text-secondary-800 mr-4 font-medium">Edit</button>
-                    <button onClick={() => handleDelete(prodId)} className="text-red-500 hover:text-red-700 font-medium">Delete</button>
-                  </td>
-                </tr>
-              );
-            })}
-            {products.length === 0 && (
+          <table className="w-full text-left font-secondary text-sm text-primary-900">
+            <thead className="bg-primary-50">
               <tr>
-                <td colSpan="4" className="px-6 py-8 text-center text-primary-500">No products found.</td>
+                <th className="px-6 py-4 font-semibold text-primary-900">Product</th>
+                <th className="px-6 py-4 font-semibold text-primary-900">Category</th>
+                <th className="px-6 py-4 font-semibold text-primary-900">Price ({currency})</th>
+                <th className="px-6 py-4 text-right font-semibold text-primary-900">Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-primary-100">
+              {products.map((prod) => {
+                const prodId = prod._id || prod.id;
+                return (
+                  <tr key={prodId} className="hover:bg-primary-50/50">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-primary-50 border border-primary-200 shadow-sm">
+                          {prod.image ? (
+                            <img src={prod.image} alt={prod.title} className="h-full w-full object-cover" />
+                          ) : (
+                            <img
+                              src={categories.find(c => (c._id || c.slug) === prod.categoryId)?.image || '/db-images/1.jpeg'}
+                              alt={prod.title}
+                              className="h-full w-full object-cover opacity-50"
+                            />
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="font-bold text-primary-900">{prod.title}</p>
+                          <p className="text-primary-500 text-xs truncate max-w-[200px]">{prod.description}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-primary-600">
+                      <span className="inline-block rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-700">
+                        {getCategoryName(prod.categoryId)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 font-medium">{formatPrice(prod.price, currency)}</td>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => openEditModal(prod)} className="text-secondary-600 hover:text-secondary-800 mr-4 font-medium">Edit</button>
+                      <button onClick={() => handleDelete(prodId)} className="text-red-500 hover:text-red-700 font-medium">Delete</button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="px-6 py-8 text-center text-primary-500">No products found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingProduct ? "Edit Product" : "Add Product"}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-secondary">
           {formError && <div className="rounded bg-red-50 p-3 text-sm text-red-600 border border-red-200">{formError}</div>}
-          
+
           <div>
             <label className="mb-1 block text-sm font-medium text-primary-900">Product Title</label>
             <input
@@ -311,23 +315,8 @@ export default function AdminProducts() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-primary-900">Digital Product File (PDF, etc.)</label>
-            <div className="flex flex-col gap-2">
-              {fileName && (
-                <div className="flex items-center justify-between rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-700 border border-primary-200">
-                  <span className="truncate max-w-[250px]">{fileName}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFileData("");
-                      setFileName("");
-                    }}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
+            <label className="my-2 block text-xs font-bold uppercase tracking-wider text-primary-500">Digital Product File</label>
+            <div className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all ${fileName ? 'border-secondary-300 bg-secondary-50/30' : 'border-primary-200 hover:border-primary-400 bg-slate-50'}`}>
               <input
                 type="file"
                 onChange={async (e) => {
@@ -342,25 +331,74 @@ export default function AdminProducts() {
                     }
                   }
                 }}
-                className="w-full text-sm text-primary-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-900 hover:file:bg-primary-200"
+                className="absolute inset-0 z-10 cursor-pointer opacity-0"
               />
-              <p className="text-[10px] text-primary-400 italic">This file will be available for download to customers after purchase.</p>
+              <div className="flex flex-col items-center p-6 text-center">
+                {fileName ? (
+                  <>
+                    <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-secondary-100 text-secondary-600">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-bold text-primary-900">{fileName}</p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFileData("");
+                        setFileName("");
+                      }}
+                      className="mt-2 text-xs font-bold text-red-500 hover:text-red-700 underline z-20"
+                    >
+                      Remove File
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium text-primary-900">Click or drag to upload digital product</p>
+                    <p className="text-xs text-primary-400">PDF, ZIP, etc. (Max 50MB)</p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-primary-900">Product Preview Image</label>
-            <div className="flex flex-col gap-3">
-              {image && (
-                <div className="relative h-32 w-full overflow-hidden rounded-lg border border-primary-200">
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-primary-500">Product Preview Image</label>
+            <div className="group relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-primary-200 bg-slate-50 transition-all hover:border-primary-400">
+              {image ? (
+                <>
                   <img src={image} alt="Preview" className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setImage("")}
-                    className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
-                  >
-                    ✕
-                  </button>
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setImage("");
+                      }}
+                      className="rounded-full bg-red-500 p-2 text-white hover:bg-red-600 shadow-lg transition-transform hover:scale-110"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center p-6 text-center">
+                  <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-primary-900">Click to upload custom preview image</p>
+                  <p className="text-xs text-primary-400 italic">Optional: Falls back to category image if empty</p>
                 </div>
               )}
               <input
@@ -377,7 +415,7 @@ export default function AdminProducts() {
                     }
                   }
                 }}
-                className="w-full text-sm text-primary-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-900 hover:file:bg-primary-200"
+                className="absolute inset-0 z-10 cursor-pointer opacity-0"
               />
             </div>
           </div>
