@@ -16,7 +16,7 @@ const policies = [
       <div className="space-y-4 font-secondary text-primary-800">
         <p>We collect necessary information such as name, email, and billing details to process orders. We do not sell your data to third parties for marketing.</p>
         <p>We use cookies to maintain functionality and analyze site usage. You have the right to access, correct, or delete your personal data by contacting support.</p>
-        <p className="text-sm">For Paddle's privacy practices, please refer to their official documentation as the merchant of record.</p>
+        <p className="text-sm">For Lemon Squeezy's privacy practices, please refer to their official documentation as our payment processor.</p>
       </div>
     ),
   },
@@ -88,8 +88,8 @@ const policies = [
     content: (
       <div className="space-y-4 font-secondary text-primary-800">
         <div>
-          <h4 className="font-bold text-primary-900 mb-1">About Paddle</h4>
-          <p>Paddle acts as our authorized reseller and payment processor. They are the merchant of record and handle secure transactions and tax collection.</p>
+          <h4 className="font-bold text-primary-900 mb-1">About Lemon Squeezy</h4>
+          <p>Lemon Squeezy acts as our authorized reseller and payment processor. They handle secure transactions, tax collection, and compliance.</p>
         </div>
         <div>
           <h4 className="font-bold text-primary-900 mb-1">Refunds</h4>
