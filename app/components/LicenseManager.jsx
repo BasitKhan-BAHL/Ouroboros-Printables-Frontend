@@ -160,63 +160,63 @@ export default function LicenseManager() {
                   disabled={!!editingLicense}
                   value={formData.id}
                   onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                  className="w-full rounded-lg border border-primary-200 px-4 py-2 focus:border-primary-900 focus:outline-none"
+                  className="w-full rounded-xl border border-primary-300 bg-white px-4 py-2.5 font-secondary text-sm text-primary-900 shadow-sm transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-900/5 focus:outline-none"
                   placeholder="commercial"
                 />
               </div>
               <div>
-                <label className="mb-1 block font-secondary text-sm font-bold text-primary-900">Title</label>
+                <label className="mb-1.5 block font-secondary text-sm font-bold text-primary-900">Title</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full rounded-lg border border-primary-200 px-4 py-2 focus:border-primary-900 focus:outline-none"
+                  className="w-full rounded-xl border border-primary-300 bg-white px-4 py-2.5 font-secondary text-sm text-primary-900 shadow-sm transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-900/5 focus:outline-none"
                   placeholder="Commercial License"
                 />
               </div>
               <div>
-                <label className="mb-1 block font-secondary text-sm font-bold text-primary-900">Description</label>
+                <label className="mb-1.5 block font-secondary text-sm font-bold text-primary-900">Description</label>
                 <textarea
                   required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full rounded-lg border border-primary-200 px-4 py-2 focus:border-primary-900 focus:outline-none"
+                  className="w-full rounded-xl border border-primary-300 bg-white px-4 py-2.5 font-secondary text-sm text-primary-900 shadow-sm transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-900/5 focus:outline-none"
                   rows="2"
                   placeholder="For business and commercial projects"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block font-secondary text-sm font-bold text-primary-900">Price (€)</label>
+                  <label className="mb-1.5 block font-secondary text-sm font-bold text-primary-900">Price (€)</label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                    className="w-full rounded-lg border border-primary-200 px-4 py-2 focus:border-primary-900 focus:outline-none"
+                    className="w-full rounded-xl border border-primary-300 bg-white px-4 py-2.5 font-secondary text-sm text-primary-900 shadow-sm transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-900/5 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block font-secondary text-sm font-bold text-primary-900">Period</label>
+                  <label className="mb-1.5 block font-secondary text-sm font-bold text-primary-900">Period</label>
                   <input
                     type="text"
                     required
                     value={formData.period}
                     onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                    className="w-full rounded-lg border border-primary-200 px-4 py-2 focus:border-primary-900 focus:outline-none"
+                    className="w-full rounded-xl border border-primary-300 bg-white px-4 py-2.5 font-secondary text-sm text-primary-900 shadow-sm transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-900/5 focus:outline-none"
                     placeholder="one-time"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block font-secondary text-sm font-bold text-primary-900">Features (comma separated)</label>
+                <label className="mb-1.5 block font-secondary text-sm font-bold text-primary-900">Features (comma separated)</label>
                 <textarea
                   required
                   value={formData.features}
                   onChange={(e) => setFormData({ ...formData, features: e.target.value })}
-                  className="w-full rounded-lg border border-primary-200 px-4 py-2 focus:border-primary-900 focus:outline-none"
+                  className="w-full rounded-xl border border-primary-300 bg-white px-4 py-2.5 font-secondary text-sm text-primary-900 shadow-sm transition-all focus:border-primary-900 focus:ring-2 focus:ring-primary-900/5 focus:outline-none"
                   rows="3"
                   placeholder="Feature 1, Feature 2, Feature 3"
                 />

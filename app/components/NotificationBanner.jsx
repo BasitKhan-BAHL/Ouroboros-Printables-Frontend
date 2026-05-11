@@ -1,13 +1,31 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { useSettings } from "../context/settings";
 
 export function NotificationBanner() {
+  const { settings, loading } = useSettings();
   const [isVisible, setIsVisible] = useState(true);
 
+  if (loading) return null;
+
+  // Default fallback settings
+  const banner = settings.banner || {
+    showDesktop: true,
+    showMobile: true,
+    text: "Special Event",
+    description: "Enjoy 50% off all amazing printables until the end of the month!",
+    buttonText: "Shop Now",
+    buttonLink: "/shop"
+  };
+
   if (!isVisible) return null;
+  if (!banner.showDesktop && !banner.showMobile) return null;
 
   return (
-    <div className="relative isolate hidden lg:flex items-center justify-center gap-3 overflow-hidden bg-primary-900 px-6 py-3 lg:flex-row lg:gap-x-6 lg:px-3.5">
+    <div className={`relative isolate items-center justify-center gap-3 overflow-hidden bg-primary-900 px-6 py-3 transition-all duration-300 
+      ${banner.showDesktop ? "lg:flex" : "lg:hidden"} 
+      ${banner.showMobile ? "flex" : "hidden"}`}>
+      
       {/* Decorative ambient blurred gradients */}
       <div
         className="absolute left-[max(-7rem,calc(50%-52rem))] top-1/2 -z-10 -translate-y-1/2 transform-gpu blur-2xl"
@@ -39,17 +57,17 @@ export function NotificationBanner() {
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-secondary-300">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
-          Special Event
+          {banner.text}
         </strong>
         <span className="hidden sm:inline opacity-50 text-secondary-200">&bull;</span>
-        <span className="opacity-90">Enjoy 50% off all amazing printables until the end of the month!</span>
+        <span className="opacity-90">{banner.description}</span>
       </p>
 
       <Link
-        to="/shop"
+        to={banner.buttonLink}
         className="flex-none rounded-full bg-secondary-500 px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-secondary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-900 transition-all duration-300 hover:scale-105"
       >
-        Shop Now <span aria-hidden="true">&rarr;</span>
+        {banner.buttonText} <span aria-hidden="true">&rarr;</span>
       </Link>
 
       <button
