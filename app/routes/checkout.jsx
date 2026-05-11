@@ -159,11 +159,7 @@ export default function Checkout() {
         checkoutLink.click();
         document.body.removeChild(checkoutLink);
       } else {
-        // Fallback
-        const receiptData = { ...data.order, paymentStatus: "paid" };
-        sessionStorage.setItem("lastOrder", JSON.stringify(receiptData));
-        clear();
-        navigate("/receipt");
+        throw new Error("Unable to initialize payment. Please try again or contact support.");
       }
 
     } catch (err) {
