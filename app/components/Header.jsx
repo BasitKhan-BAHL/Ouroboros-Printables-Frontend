@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router";
 import logo from "../assets/logo.jpeg";
 import { useCart } from "../context/cart";
@@ -54,14 +54,27 @@ export function Header() {
   const { totalQuantity } = useCart();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-primary-200 bg-primary-50 shadow-sm">
+    <header className={`sticky top-0 z-50 transition-all duration-300 ${
+      isScrolled 
+        ? "border-b border-primary-200 bg-primary-50/95 backdrop-blur-md shadow-sm" 
+        : "max-md:border-none max-md:bg-transparent max-md:shadow-none border-b border-primary-200 bg-primary-50 shadow-sm"
+    }`}>
       <nav className="mx-auto flex max-w-[90rem] items-center justify-between px-6 py-4 sm:px-8">
         <div className="flex items-center gap-1 sm:gap-2">
           {location.pathname !== '/' && (

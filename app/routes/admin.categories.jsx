@@ -104,7 +104,10 @@ export default function AdminCategories() {
         });
       } else {
         await createCategory({
-          _id: slug, title, description, image
+          _id: slug.trim() || undefined, 
+          title, 
+          description, 
+          image
         });
       }
       setIsModalOpen(false);
@@ -203,15 +206,18 @@ export default function AdminCategories() {
           {formError && <div className="rounded bg-red-50 p-3 text-sm text-red-600 border border-red-200">{formError}</div>}
           
           <div>
-            <label className="mb-1 block text-sm font-medium text-primary-900">Unique Slug ID (e.g. "literature")</label>
+            <label className="mb-1 block text-sm font-medium text-primary-900">Unique Slug ID (Optional)</label>
             <input
               type="text"
-              required
               disabled={!!editingCategory}
               value={slug}
               onChange={(e) => setSlug(e.target.value.toLowerCase().trim())}
+              placeholder="Auto-generated from title if empty"
               className="w-full rounded-lg border border-primary-200 px-3 py-2 text-primary-900 focus:outline-none focus:border-primary-400 disabled:opacity-50"
             />
+            {!editingCategory && (
+              <p className="mt-1 text-xs text-primary-500 italic">Leave blank to use a web-friendly version of your title.</p>
+            )}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-primary-900">Display Title</label>
