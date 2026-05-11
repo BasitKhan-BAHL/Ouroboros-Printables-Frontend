@@ -132,13 +132,25 @@ export default function AdminProducts() {
         fileName
       };
 
+      let result;
       if (editingProduct) {
-        await updateProduct(editingProduct._id || editingProduct.id, payload);
+        result = await updateProduct(editingProduct._id || editingProduct.id, payload);
+        // Optimistic local update
+        setProducts(prev => prev.map(p => 
+          (p._id || p.id) === (editingProduct._id || editingProduct.id) 
+            ? { ...p, ...payload } 
+            : p
+        ));
       } else {
-        await createProduct(payload);
+        result = await createProduct(payload);
+        // Prepend new product to list for instant feedback
+        if (result && (result._id || result.id)) {
+          setProducts(prev => [result, ...prev]);
+        }
       }
       setIsModalOpen(false);
-      await fetchProductsData();
+      // Optional: Silent refresh to ensure everything is perfectly in sync
+      fetchProductsData();
     } catch (err) {
       setFormError(err.message || "An error occurred");
     }
