@@ -121,7 +121,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-primary-50">
-      <div className="mx-auto max-w-[90rem] px-6 pt-8 pb-12 sm:px-8">
+      <div className="mx-auto max-w-[90rem] px-6 pt-14 pb-12 sm:px-8">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-primary-200 pb-8">
           <div>
             <h1 className="font-primary text-4xl font-bold tracking-tight text-primary-900">Admin Dashboard</h1>
