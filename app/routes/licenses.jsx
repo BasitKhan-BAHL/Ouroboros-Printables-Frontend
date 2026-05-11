@@ -347,10 +347,10 @@ export default function Licenses() {
       <div className="mt-16 flex justify-center">
         <button
           onClick={handleContinue}
-          disabled={isProcessing}
-          className="rounded-lg bg-primary-900 px-8 py-3 font-secondary font-medium text-white transition hover:bg-primary-800"
+          disabled={isProcessing || isActivating}
+          className="rounded-lg bg-primary-900 px-8 py-3 font-secondary font-medium text-white transition hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isProcessing ? "Starting checkout..." : "Buy License and Continue"}
+          {isProcessing ? "Starting checkout..." : isActivating ? "Activating..." : "Buy License and Continue"}
         </button>
       </div>
     </div>
