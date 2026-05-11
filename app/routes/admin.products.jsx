@@ -50,6 +50,7 @@ export default function AdminProducts() {
 
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingIds, setDeletingIds] = useState(new Set());
 
   // Filter State
   const [searchTerm, setSearchTerm] = useState("");
@@ -146,11 +147,22 @@ export default function AdminProducts() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
+    
+    setDeletingIds(prev => new Set(prev).add(id));
     try {
       await deleteProduct(id);
-      await fetchProductsData();
+      // Remove from local state immediately for a fast feel
+      setProducts(prev => prev.filter(p => (p._id || p.id) !== id));
     } catch (err) {
       alert(err.message || "Failed to delete");
+      // Refresh list if delete failed to ensure UI is in sync
+      await fetchProductsData();
+    } finally {
+      setDeletingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
   };
 
@@ -246,8 +258,20 @@ export default function AdminProducts() {
                     </td>
                     <td className="px-6 py-4 font-medium">{formatPrice(prod.price, currency)}</td>
                     <td className="px-6 py-4 text-right">
-                      <button onClick={() => openEditModal(prod)} className="text-secondary-600 hover:text-secondary-800 mr-4 font-medium">Edit</button>
-                      <button onClick={() => handleDelete(prodId)} className="text-red-500 hover:text-red-700 font-medium">Delete</button>
+                      {deletingIds.has(prodId) ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-400 animate-pulse uppercase tracking-wider">
+                          <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Deleting
+                        </span>
+                      ) : (
+                        <>
+                          <button onClick={() => openEditModal(prod)} className="text-secondary-600 hover:text-secondary-800 mr-4 font-medium transition-colors">Edit</button>
+                          <button onClick={() => handleDelete(prodId)} className="text-red-500 hover:text-red-700 font-medium transition-colors">Delete</button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 );
