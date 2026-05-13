@@ -46,13 +46,17 @@ export default function Product() {
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
+        // Refresh user data to get latest purchase history
+        if (user) {
+          try { await refreshUser(); } catch(e) {}
+        }
         const prodData = await getProduct(productId);
         if (prodData) {
           setProduct(prodData);
@@ -127,24 +131,64 @@ export default function Product() {
               </svg>
               Instant PDF Download – Available immediately after purchase
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                const pid = product._id || product.id;
-                if (!user) {
-                  navigate(`/account?action=add_to_cart&productId=${pid}&redirect=${window.location.pathname}`);
-                } else if (!user.license) {
-                  navigate(`/licenses?action=add_to_cart&productId=${pid}&redirect=${window.location.pathname}`);
-                } else {
-                  addItem(pid);
-                  navigate("/cart");
-                }
-              }}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-6 py-3 font-secondary font-medium text-white hover:bg-primary-800 sm:w-auto"
-            >
-              <CartIcon />
-              Add to Cart
-            </button>
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const pid = product._id || product.id;
+                  if (!user) {
+                    navigate(`/account?action=add_to_cart&productId=${pid}&redirect=${window.location.pathname}`);
+                  } else if (!user.license) {
+                    navigate(`/licenses?action=add_to_cart&productId=${pid}&redirect=${window.location.pathname}`);
+                  } else {
+                    addItem(pid);
+                    navigate("/cart");
+                  }
+                }}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-900 px-6 py-3 font-secondary font-medium text-white hover:bg-primary-800"
+              >
+                <CartIcon />
+                Add to Cart
+              </button>
+
+              {(user?.purchasedProducts?.includes(product._id || product.id) || user?.isAdmin) && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const token = window.localStorage.getItem("token");
+                      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+                      const pid = product._id || product.id;
+                      
+                      const response = await fetch(`${apiUrl}/products/${pid}/download`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                      });
+                      
+                      if (!response.ok) throw new Error("Download failed");
+                      
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = product.fileName || `${product.title}.pdf`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                    } catch (err) {
+                      alert("Failed to download file. Please try again.");
+                    }
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-secondary-500 bg-white px-6 py-2.5 font-secondary font-medium text-secondary-600 hover:bg-secondary-50 transition-all shadow-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download Now
+                </button>
+              )}
+            </div>
             <div className="mt-8 grid gap-6 sm:grid-cols-2">
               <div className="flex gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary-100 text-secondary-500">
